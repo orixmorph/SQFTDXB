@@ -1,0 +1,6 @@
+{
+  "name": "SQFT DXB - Secondary & Ready Properties Dubai",
+  "description": "Dubai's premier PropTech platform for verified secondary-market and ready-to-move luxury apartments, villas, and penthouses.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
