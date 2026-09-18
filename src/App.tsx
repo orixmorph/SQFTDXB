@@ -22,12 +22,6 @@ import { properties } from './data/mockData';
 import { BlogPost } from './data/blogData';
 import {
   ArrowRight,
-  ShieldCheck,
-  CheckCircle2,
-  XCircle,
-  Building,
-  Key,
-  TrendingUp,
   Sparkles,
 } from 'lucide-react';
 
@@ -243,120 +237,6 @@ export default function App() {
               onViewAllBlog={() => navigateTo('blog')}
               onSelectPost={handleSelectBlogPost}
             />
-
-            {/* SECTION 08 — WHY SECONDARY & READY (PROPTECH POSITIONING) */}
-            <section className="w-full py-16 md:py-24 bg-[#FAFAF9] border-b border-[#F0F0EE]">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center max-w-3xl mx-auto mb-14">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-xs font-semibold text-[#171717] border border-[#EAEAEA] mb-3">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#CF9F5D]" />
-                    <span>The Secondary Advantage</span>
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#171717] tracking-tight">
-                    Why Smart Buyers Choose Ready Properties
-                  </h2>
-                  <p className="text-sm sm:text-base text-[#6F6F6F] mt-3">
-                    In a market saturated with speculative launches, SQFT DXB is built around clarity, immediate utility, and verified ownership.
-                  </p>
-                </div>
-
-                {/* Comparison Card Table */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
-                  {/* SQFT DXB Secondary Column */}
-                  <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-[#CF9F5D]/40 shadow-[0_12px_30px_rgba(0,0,0,0.04)] space-y-5">
-                    <div className="flex items-center justify-between pb-4 border-b border-[#F0F0EE]">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[#171717] text-white flex items-center justify-center font-bold text-xs">
-                          <span className="text-[#CF9F5D]">S</span>Q
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-extrabold text-[#171717]">
-                            SQFT DXB Secondary
-                          </h3>
-                          <span className="text-[11px] font-semibold text-[#CF9F5D]">
-                            Verified & Ready
-                          </span>
-                        </div>
-                      </div>
-                      <span className="px-3 py-1 rounded-full bg-[#FBF9F5] text-xs font-bold text-[#CF9F5D] border border-[#CF9F5D]/30">
-                        100% Certainty
-                      </span>
-                    </div>
-
-                    <ul className="space-y-3.5 text-xs sm:text-sm">
-                      <li className="flex items-start gap-3 text-[#171717]">
-                        <CheckCircle2 className="w-5 h-5 text-[#CF9F5D] flex-shrink-0 mt-0.5" />
-                        <div>
-                          <strong>Immediate Occupancy:</strong> Keys handed over on day one. Move in or lease out without delay.
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3 text-[#171717]">
-                        <CheckCircle2 className="w-5 h-5 text-[#CF9F5D] flex-shrink-0 mt-0.5" />
-                        <div>
-                          <strong>Physical Inspection:</strong> Inspect exact views, natural light, elevator speeds, and finishing quality before committing.
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3 text-[#171717]">
-                        <CheckCircle2 className="w-5 h-5 text-[#CF9F5D] flex-shrink-0 mt-0.5" />
-                        <div>
-                          <strong>Registered Title Deed:</strong> Fully registered with Dubai Land Department with clear legal status.
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3 text-[#171717]">
-                        <CheckCircle2 className="w-5 h-5 text-[#CF9F5D] flex-shrink-0 mt-0.5" />
-                        <div>
-                          <strong>Immediate Rental Yield:</strong> Start earning up to 7-9% net rental income from day of transfer.
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Typical Off-Plan Market Column */}
-                  <div className="bg-white/70 rounded-3xl p-6 sm:p-8 border border-[#EAEAEA] space-y-5">
-                    <div className="flex items-center justify-between pb-4 border-b border-[#F0F0EE]">
-                      <div>
-                        <h3 className="text-lg font-bold text-[#6F6F6F]">
-                          Traditional Off-Plan
-                        </h3>
-                        <span className="text-[11px] text-[#8A8A8A]">
-                          Under-Construction Speculation
-                        </span>
-                      </div>
-                      <span className="px-3 py-1 rounded-full bg-[#F7F7F5] text-xs font-semibold text-[#8A8A8A]">
-                        High Uncertainty
-                      </span>
-                    </div>
-
-                    <ul className="space-y-3.5 text-xs sm:text-sm">
-                      <li className="flex items-start gap-3 text-[#6F6F6F]">
-                        <XCircle className="w-5 h-5 text-[#8A8A8A] flex-shrink-0 mt-0.5" />
-                        <div>
-                          <strong>3–5 Year Waiting Period:</strong> Capital locked during construction with common handover postponements.
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3 text-[#6F6F6F]">
-                        <XCircle className="w-5 h-5 text-[#8A8A8A] flex-shrink-0 mt-0.5" />
-                        <div>
-                          <strong>Uncertain Reality:</strong> Relying on 3D computer renders; actual view and build quality can vary.
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3 text-[#6F6F6F]">
-                        <XCircle className="w-5 h-5 text-[#8A8A8A] flex-shrink-0 mt-0.5" />
-                        <div>
-                          <strong>Delayed ROI:</strong> Zero rental return until project completion and initial snagging is solved.
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3 text-[#6F6F6F]">
-                        <XCircle className="w-5 h-5 text-[#8A8A8A] flex-shrink-0 mt-0.5" />
-                        <div>
-                          <strong>Substantial Handover Charges:</strong> Unforeseen service charges and final payment balloon costs.
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </section>
           </div>
         )}
 

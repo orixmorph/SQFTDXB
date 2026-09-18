@@ -15,13 +15,23 @@ import {
 import { PropertyPurpose, SearchFilterState } from '../types';
 import { areas } from '../data/mockData';
 
+// Replace this Cloudinary URL with your desired 1st section background image link
+export const HERO_SECTION_BG_IMAGE =
+  'https://res.cloudinary.com/dy6km7beb/image/upload/v1789730260/ChatGPT_Image_Sep_18_2026_03_17_13_PM_tl4sck.png';
+
 interface HeroProps {
   onSearch: (filter: Partial<SearchFilterState>) => void;
   onSelectArea: (areaId: string) => void;
   onOpenListProperty?: (purpose: PropertyPurpose) => void;
+  backgroundImageUrl?: string;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListProperty }) => {
+export const Hero: React.FC<HeroProps> = ({
+  onSearch,
+  onSelectArea,
+  onOpenListProperty,
+  backgroundImageUrl,
+}) => {
   const [purpose, setPurpose] = useState<PropertyPurpose>('buy');
   const [selectedArea, setSelectedArea] = useState<string>('');
   const [propertyType, setPropertyType] = useState<string>('');
@@ -79,14 +89,16 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
 
   return (
     <section className="relative w-full pt-8 pb-16 md:pt-12 md:pb-20 overflow-hidden bg-[#FAFAF9] border-b border-[#F0F0EE]">
-      {/* Subtle Background Architectural Image with Soft Light Mask */}
-      <div className="absolute inset-0 z-0 opacity-[0.14] pointer-events-none">
+      {/* Hero Background Architectural Image with Reduced White Transparency */}
+      <div className="absolute inset-0 z-0 opacity-80 pointer-events-none transition-opacity duration-300">
         <img
-          src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=2000&q=85"
-          alt="Dubai Skyline"
-          className="w-full h-full object-cover object-center filter grayscale contrast-125"
+          src={backgroundImageUrl || HERO_SECTION_BG_IMAGE}
+          alt="Dubai Secondary Luxury Properties"
+          className="w-full h-full object-cover object-center contrast-[1.05]"
+          referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FAFAF9] via-transparent to-[#FAFAF9]" />
+        {/* Soft, minimal top/bottom edge gradient to smoothly blend into navigation and next section */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FAFAF9]/25 via-transparent to-[#FAFAF9]/65" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -115,43 +127,43 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#171717] tracking-tight leading-[1.15] mb-3">
             Real Properties. Real Details. <span className="text-[#CF9F5D]">Dubai.</span>
           </h1>
-          <p className="text-sm sm:text-base text-[#6F6F6F] leading-relaxed max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-[#4A4A4A] font-medium leading-relaxed max-w-2xl mx-auto">
             Discover verified secondary-market residences and ready homes across Dubai’s most desirable communities. Actual photos, confirmed availability, and immediate key handover.
           </p>
         </div>
 
-        {/* Streamlined Hero Search Box Card with Reduced Height (Same Width: max-w-4xl) */}
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl p-3.5 sm:p-5 shadow-[0_12px_36px_rgba(0,0,0,0.06)] border border-[#EAEAEA]">
-          {/* Top Tabs & Badges Row (Reduced margin/height) */}
-          <div className="flex items-center justify-between border-b border-[#F0F0EE] pb-2.5 mb-3">
-            <div className="flex items-center gap-1.5 bg-[#F7F7F5] p-1 rounded-lg">
+        {/* Streamlined Hero Search Box Card with Reduced Size */}
+        <div className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-[0_10px_28px_rgba(0,0,0,0.06)] border border-[#EAEAEA]">
+          {/* Top Tabs & Badges Row */}
+          <div className="flex items-center justify-between border-b border-[#F0F0EE] pb-2 mb-2.5">
+            <div className="flex items-center gap-1 bg-[#F7F7F5] p-1 rounded-lg">
               <button
                 type="button"
                 id="hero-tab-buy"
                 onClick={() => setPurpose('buy')}
-                className={`px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-all cursor-pointer ${
+                className={`px-3.5 py-1 text-xs sm:text-sm font-semibold rounded-md transition-all cursor-pointer ${
                   purpose === 'buy'
                     ? 'bg-white text-[#171717] shadow-sm'
                     : 'text-[#6F6F6F] hover:text-[#171717]'
                 }`}
               >
-                Buy Ready
+                Buy
               </button>
               <button
                 type="button"
                 id="hero-tab-rent"
                 onClick={() => setPurpose('rent')}
-                className={`px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-all cursor-pointer ${
+                className={`px-3.5 py-1 text-xs sm:text-sm font-semibold rounded-md transition-all cursor-pointer ${
                   purpose === 'rent'
                     ? 'bg-white text-[#171717] shadow-sm'
                     : 'text-[#6F6F6F] hover:text-[#171717]'
                 }`}
               >
-                Rent Ready
+                Rent
               </button>
             </div>
 
-            <div className="flex items-center gap-2 text-[11px] text-[#6F6F6F]">
+            <div className="flex items-center gap-1.5 text-[11px] text-[#6F6F6F]">
               <ShieldCheck className="w-3.5 h-3.5 text-[#CF9F5D]" />
               <span className="hidden sm:inline font-medium">100% Secondary & Ready Only</span>
               <span className="sm:hidden font-medium">Ready Only</span>
@@ -159,12 +171,12 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
           </div>
 
           {/* Compact Form */}
-          <form onSubmit={handleSearchSubmit} className="space-y-2.5">
+          <form onSubmit={handleSearchSubmit} className="space-y-2">
             {/* Unified Search Input + Submit Button Row */}
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-[#8A8A8A]" />
+                  <Search className="h-3.5 w-3.5 text-[#8A8A8A]" />
                 </div>
                 <input
                   type="text"
@@ -172,14 +184,14 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search building, project, or area (e.g. Marina Gate, Downtown, Palm Villa)..."
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#F9F9F8] border border-[#EAEAEA] rounded-xl text-xs sm:text-sm text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#CF9F5D]/30 focus:border-[#CF9F5D] transition-all"
+                  className="w-full pl-8 pr-3 py-2 bg-[#F9F9F8] border border-[#EAEAEA] rounded-lg text-xs sm:text-sm text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#CF9F5D]/30 focus:border-[#CF9F5D] transition-all"
                 />
               </div>
 
               <button
                 type="submit"
                 id="hero-submit-search-btn"
-                className="px-6 py-2.5 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] active:bg-[#000000] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow cursor-pointer flex-shrink-0"
+                className="px-5 py-2 rounded-lg bg-[#171717] hover:bg-[#2A2A2A] active:bg-[#000000] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all duration-200 shadow-sm hover:shadow cursor-pointer flex-shrink-0"
               >
                 <Search className="w-3.5 h-3.5 text-[#CF9F5D]" />
                 <span>Search</span>
@@ -187,14 +199,14 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
             </div>
 
             {/* Compact Filters Grid Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
               {/* Location */}
               <div className="relative">
                 <select
                   id="hero-area-select"
                   value={selectedArea}
                   onChange={(e) => setSelectedArea(e.target.value)}
-                  className="w-full pl-3 pr-7 py-2 bg-white border border-[#EAEAEA] rounded-lg text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer truncate"
+                  className="w-full pl-2.5 pr-6 py-1.5 bg-white border border-[#EAEAEA] rounded-md text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer truncate"
                   title="Location / Area"
                 >
                   <option value="">All Dubai Areas</option>
@@ -204,7 +216,7 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
                     </option>
                   ))}
                 </select>
-                <MapPin className="w-3.5 h-3.5 text-[#8A8A8A] absolute right-2.5 top-2.5 pointer-events-none" />
+                <MapPin className="w-3 h-3 text-[#8A8A8A] absolute right-2 top-2 pointer-events-none" />
               </div>
 
               {/* Property Type */}
@@ -213,7 +225,7 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
                   id="hero-type-select"
                   value={propertyType}
                   onChange={(e) => setPropertyType(e.target.value)}
-                  className="w-full pl-3 pr-7 py-2 bg-white border border-[#EAEAEA] rounded-lg text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer"
+                  className="w-full pl-2.5 pr-6 py-1.5 bg-white border border-[#EAEAEA] rounded-md text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer"
                   title="Property Type"
                 >
                   <option value="">All Types</option>
@@ -223,7 +235,7 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
                   <option value="Townhouse">Townhouse</option>
                   <option value="Duplex">Duplex</option>
                 </select>
-                <Home className="w-3.5 h-3.5 text-[#8A8A8A] absolute right-2.5 top-2.5 pointer-events-none" />
+                <Home className="w-3 h-3 text-[#8A8A8A] absolute right-2 top-2 pointer-events-none" />
               </div>
 
               {/* Bedrooms */}
@@ -232,7 +244,7 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
                   id="hero-beds-select"
                   value={bedrooms}
                   onChange={(e) => setBedrooms(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-lg text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer"
+                  className="w-full px-2.5 py-1.5 bg-white border border-[#EAEAEA] rounded-md text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer"
                   title="Bedrooms"
                 >
                   <option value="">Any Beds</option>
@@ -250,7 +262,7 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, onSelectArea, onOpenListPr
                   id="hero-price-select"
                   value={priceRange}
                   onChange={(e) => setPriceRange(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-lg text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer truncate"
+                  className="w-full px-2.5 py-1.5 bg-white border border-[#EAEAEA] rounded-md text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer truncate"
                   title="Price Range"
                 >
                   <option value="">Any Budget</option>
