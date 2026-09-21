@@ -4,7 +4,6 @@ import { Hero } from './components/Hero';
 import { SellRentCtaBanner } from './components/SellRentCtaBanner';
 import { TrendingAreas } from './components/TrendingAreas';
 import { NewSecondaryProjects } from './components/NewSecondaryProjects';
-import { PropertyCard } from './components/PropertyCard';
 import { BlogPreview } from './components/BlogPreview';
 import { BlogView } from './components/BlogView';
 import { PropertiesPage } from './components/PropertiesPage';
@@ -20,10 +19,6 @@ import { Footer } from './components/Footer';
 import { Property, SearchFilterState, PropertyPurpose } from './types';
 import { properties } from './data/mockData';
 import { BlogPost } from './data/blogData';
-import {
-  ArrowRight,
-  Sparkles,
-} from 'lucide-react';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<string>('home');
@@ -45,7 +40,6 @@ export default function App() {
   const [isListPropertyOpen, setIsListPropertyOpen] = useState(false);
   const [listPropertyPurpose, setListPropertyPurpose] = useState<PropertyPurpose>('buy');
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
-  const [featuredFilter, setFeaturedFilter] = useState<'all' | 'buy' | 'rent'>('all');
 
   useEffect(() => {
     try {
@@ -110,11 +104,6 @@ export default function App() {
     savedPropertyIds.includes(p.id)
   );
 
-  const homeFeaturedProperties = properties.filter((p) => {
-    if (featuredFilter === 'all') return true;
-    return p.purpose === featuredFilter;
-  }).slice(0, 6);
-
   return (
     <div className="min-h-screen bg-white text-[#171717] flex flex-col font-sans selection:bg-[#CF9F5D]/20 selection:text-[#171717]">
       {/* Top Main Navigation */}
@@ -148,91 +137,13 @@ export default function App() {
               onViewAllAreas={() => navigateTo('areas')}
             />
 
-            {/* SECTION 04 — BROWSE NEW PROJECTS IN DUBAI CAROUSEL */}
+            {/* SECTION 04 — HOT LISTINGS OF THE WEEK CAROUSEL */}
             <NewSecondaryProjects
               onSelectProperty={(prop) => setSelectedProperty(prop)}
               onViewAllProperties={() => navigateTo('properties')}
             />
 
-            {/* SECTION 05 — FEATURED READY RESIDENCES GRID */}
-            <section className="w-full py-16 md:py-24 bg-white border-b border-[#F0F0EE]">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-                  <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F7F7F5] text-xs font-semibold text-[#171717] mb-2.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#CF9F5D]" />
-                      <span>Curated Secondary Selection</span>
-                    </div>
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#171717] tracking-tight">
-                      Featured Ready Residences
-                    </h2>
-                    <p className="text-sm sm:text-base text-[#6F6F6F] mt-2 max-w-xl">
-                      Handpicked luxury secondary apartments, sky villas, and private homes in Dubai's premier neighborhoods.
-                    </p>
-                  </div>
-
-                  {/* Filter Pills */}
-                  <div className="flex items-center gap-2 bg-[#F7F7F5] p-1 rounded-xl self-start md:self-auto">
-                    <button
-                      onClick={() => setFeaturedFilter('all')}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                        featuredFilter === 'all'
-                          ? 'bg-white text-[#171717] shadow-sm'
-                          : 'text-[#6F6F6F] hover:text-[#171717]'
-                      }`}
-                    >
-                      All Ready
-                    </button>
-                    <button
-                      onClick={() => setFeaturedFilter('buy')}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                        featuredFilter === 'buy'
-                          ? 'bg-white text-[#171717] shadow-sm'
-                          : 'text-[#6F6F6F] hover:text-[#171717]'
-                      }`}
-                    >
-                      For Sale
-                    </button>
-                    <button
-                      onClick={() => setFeaturedFilter('rent')}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                        featuredFilter === 'rent'
-                          ? 'bg-white text-[#171717] shadow-sm'
-                          : 'text-[#6F6F6F] hover:text-[#171717]'
-                      }`}
-                    >
-                      For Rent
-                    </button>
-                  </div>
-                </div>
-
-                {/* Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {homeFeaturedProperties.map((property) => (
-                    <PropertyCard
-                      key={property.id}
-                      property={property}
-                      onSelect={(prop) => setSelectedProperty(prop)}
-                      isSaved={savedPropertyIds.includes(property.id)}
-                      onToggleSave={handleToggleSaveProperty}
-                    />
-                  ))}
-                </div>
-
-                {/* View More Button */}
-                <div className="mt-10 flex justify-center">
-                  <button
-                    onClick={() => navigateTo('properties')}
-                    className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] text-white font-bold text-sm transition-all shadow-sm hover:shadow"
-                  >
-                    <span>Browse All Secondary Listings</span>
-                    <ArrowRight className="w-4 h-4 text-[#CF9F5D]" />
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            {/* SECTION 07 — BLOG & SECONDARY MARKET INSIGHTS */}
+            {/* SECTION 05 — BLOG & SECONDARY MARKET INSIGHTS */}
             <BlogPreview
               onViewAllBlog={() => navigateTo('blog')}
               onSelectPost={handleSelectBlogPost}

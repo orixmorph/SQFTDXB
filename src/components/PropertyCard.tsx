@@ -52,8 +52,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             </span>
           </div>
 
-          {/* Favorite Toggle Button */}
-          {onToggleSave && (
+          {/* Favorite Toggle Button - hidden until login is added */}
+          {false && onToggleSave && (
             <button
               id={`fav-btn-${property.id}`}
               onClick={(e) => onToggleSave(property.id, e)}

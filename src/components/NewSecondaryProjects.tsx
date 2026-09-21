@@ -52,15 +52,15 @@ export const NewSecondaryProjects: React.FC<NewSecondaryProjectsProps> = ({
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-xs font-semibold text-[#171717] border border-[#EAEAEA] mb-2.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-xs font-semibold text-[#171717] border border-[#EAEAEA] mb-2.5 shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-[#CF9F5D]" />
-              <span>Secondary Market Additions</span>
+              <span>Curated Secondary Exclusives</span>
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#171717] tracking-tight">
-              Browse New Projects in Dubai
+              Hot Listings of the Week
             </h2>
             <p className="text-sm sm:text-base text-[#6F6F6F] mt-2 max-w-2xl">
-              Newly listed secondary residences and completed projects ready for immediate occupancy. No construction waiting times, fully verified title deeds.
+              Newly verified secondary residences and ready-to-move homes available for immediate transfer. 100% verified title deeds, zero construction waiting periods.
             </p>
           </div>
 

@@ -95,7 +95,8 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {onToggleSave && (
+            {/* Heart save button - hidden until login is added */}
+            {false && onToggleSave && (
               <button
                 id="modal-save-btn"
                 onClick={(e) => onToggleSave(property.id, e)}

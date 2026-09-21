@@ -18,7 +18,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenListProperty }
               <img
                 src="https://res.cloudinary.com/dy6km7beb/image/upload/v1787668456/Screenshot_2026-08-25_at_6.34.07_pm_mfn070.png"
                 alt="SQFT DXB - Real Estate"
-                className="h-12 w-auto object-contain rounded-xl"
+                className="h-8 sm:h-9 w-auto object-contain rounded-lg"
                 referrerPolicy="no-referrer"
               />
               <div className="flex items-center gap-1.5 text-xs text-[#6F6F6F] mt-1">

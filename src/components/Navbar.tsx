@@ -59,20 +59,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <img
                 src="https://res.cloudinary.com/dy6km7beb/image/upload/v1787668456/Screenshot_2026-08-25_at_6.34.07_pm_mfn070.png"
                 alt="SQFT DXB - Real Estate"
-                className="h-10 sm:h-12 w-auto object-contain rounded-xl transition-transform duration-300 group-hover:scale-105"
+                className="h-7 sm:h-8.5 w-auto object-contain rounded-lg transition-transform duration-300 group-hover:scale-105"
                 referrerPolicy="no-referrer"
               />
             </button>
-            <a
-              href="https://jamokaproperties.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F7F7F5] border border-[#EAEAEA] text-[11px] font-semibold text-[#6F6F6F] hover:text-[#171717] hover:border-[#CF9F5D] transition-colors shadow-xs"
-              title="Powered by Jamoka Properties"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#CF9F5D]"></span>
-              <span>Powered by Jamoka Properties</span>
-            </a>
           </div>
 
           {/* Desktop Navigation Links */}
@@ -95,21 +85,23 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Desktop Right Actions */}
           <div className="hidden md:flex items-center gap-3">
-            {/* Saved Properties counter button */}
-            <button
-              id="nav-saved-btn"
-              onClick={onOpenSavedModal}
-              className="relative p-2.5 rounded-full text-[#4A4A4A] hover:text-[#171717] hover:bg-[#F7F7F5] transition-colors cursor-pointer"
-              title="Saved Properties"
-              aria-label="View Saved Properties"
-            >
-              <Heart className="w-5 h-5 stroke-[1.75]" />
-              {savedCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-[#CF9F5D] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {savedCount}
-                </span>
-              )}
-            </button>
+            {/* Saved Properties counter button - temporarily hidden until login is added */}
+            {false && (
+              <button
+                id="nav-saved-btn"
+                onClick={onOpenSavedModal}
+                className="relative p-2.5 rounded-full text-[#4A4A4A] hover:text-[#171717] hover:bg-[#F7F7F5] transition-colors cursor-pointer"
+                title="Saved Properties"
+                aria-label="View Saved Properties"
+              >
+                <Heart className="w-5 h-5 stroke-[1.75]" />
+                {savedCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#CF9F5D] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {savedCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* List Your Property CTA */}
             <button
@@ -124,19 +116,22 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Mobile Menu & Saved Button */}
           <div className="flex md:hidden items-center gap-2">
-            <button
-              id="mobile-saved-btn"
-              onClick={onOpenSavedModal}
-              className="relative p-2 rounded-lg text-[#4A4A4A] hover:bg-[#F7F7F5]"
-              aria-label="Saved properties"
-            >
-              <Heart className="w-5 h-5 stroke-[1.75]" />
-              {savedCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-[#CF9F5D] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {savedCount}
-                </span>
-              )}
-            </button>
+            {/* Mobile Saved Button - temporarily hidden until login is added */}
+            {false && (
+              <button
+                id="mobile-saved-btn"
+                onClick={onOpenSavedModal}
+                className="relative p-2 rounded-lg text-[#4A4A4A] hover:bg-[#F7F7F5]"
+                aria-label="Saved properties"
+              >
+                <Heart className="w-5 h-5 stroke-[1.75]" />
+                {savedCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#CF9F5D] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {savedCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             <button
               id="mobile-menu-toggle-btn"

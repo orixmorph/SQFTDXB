@@ -134,7 +134,7 @@ export const Hero: React.FC<HeroProps> = ({
 
         {/* Streamlined Hero Search Box Card with Reduced Size */}
         <div className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-[0_10px_28px_rgba(0,0,0,0.06)] border border-[#EAEAEA]">
-          {/* Top Tabs & Badges Row */}
+          {/* Top Tabs Row */}
           <div className="flex items-center justify-between border-b border-[#F0F0EE] pb-2 mb-2.5">
             <div className="flex items-center gap-1 bg-[#F7F7F5] p-1 rounded-lg">
               <button
@@ -161,12 +161,6 @@ export const Hero: React.FC<HeroProps> = ({
               >
                 Rent
               </button>
-            </div>
-
-            <div className="flex items-center gap-1.5 text-[11px] text-[#6F6F6F]">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#CF9F5D]" />
-              <span className="hidden sm:inline font-medium">100% Secondary & Ready Only</span>
-              <span className="sm:hidden font-medium">Ready Only</span>
             </div>
           </div>
 
