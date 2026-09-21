@@ -242,7 +242,7 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setStep(2)}
-                      className="px-6 py-2.5 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] text-white text-xs font-semibold transition-colors cursor-pointer"
+                      className="px-6 py-2.5 rounded-xl bg-[#CF9F5D] hover:bg-[#BE8E4D] active:bg-[#AB7E3F] text-white text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs hover:shadow-sm"
                     >
                       Continue to Contact Info →
                     </button>
@@ -341,7 +341,7 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
 
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
+                      className="px-6 py-2.5 rounded-xl bg-[#CF9F5D] hover:bg-[#BE8E4D] active:bg-[#AB7E3F] text-white text-xs font-bold transition-all duration-200 cursor-pointer shadow-sm hover:shadow-[0_4px_14px_rgba(207,159,93,0.35)]"
                     >
                       Submit Listing Request
                     </button>

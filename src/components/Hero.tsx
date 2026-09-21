@@ -17,7 +17,7 @@ import { areas } from '../data/mockData';
 
 // Replace this Cloudinary URL with your desired 1st section background image link
 export const HERO_SECTION_BG_IMAGE =
-  'https://res.cloudinary.com/dy6km7beb/image/upload/v1789730260/ChatGPT_Image_Sep_18_2026_03_17_13_PM_tl4sck.png';
+  'https://res.cloudinary.com/dy6km7beb/image/upload/v1789983767/ChatGPT_Image_Sep_19_2026_11_20_31_AM_bjcrx2.png';
 
 interface HeroProps {
   onSearch: (filter: Partial<SearchFilterState>) => void;
@@ -132,16 +132,16 @@ export const Hero: React.FC<HeroProps> = ({
           </p>
         </div>
 
-        {/* Streamlined Hero Search Box Card with Reduced Size */}
-        <div className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-[0_10px_28px_rgba(0,0,0,0.06)] border border-[#EAEAEA]">
+        {/* Streamlined Hero Search Box Card */}
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 shadow-[0_12px_32px_rgba(0,0,0,0.07)] border border-[#EAEAEA]">
           {/* Top Tabs Row */}
-          <div className="flex items-center justify-between border-b border-[#F0F0EE] pb-2 mb-2.5">
-            <div className="flex items-center gap-1 bg-[#F7F7F5] p-1 rounded-lg">
+          <div className="flex items-center justify-between border-b border-[#F0F0EE] pb-2.5 mb-3.5">
+            <div className="flex items-center gap-1.5 bg-[#F7F7F5] p-1 sm:p-1.5 rounded-xl border border-[#EAEAEA]">
               <button
                 type="button"
                 id="hero-tab-buy"
                 onClick={() => setPurpose('buy')}
-                className={`px-3.5 py-1 text-xs sm:text-sm font-semibold rounded-md transition-all cursor-pointer ${
+                className={`px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                   purpose === 'buy'
                     ? 'bg-white text-[#171717] shadow-sm'
                     : 'text-[#6F6F6F] hover:text-[#171717]'
@@ -153,7 +153,7 @@ export const Hero: React.FC<HeroProps> = ({
                 type="button"
                 id="hero-tab-rent"
                 onClick={() => setPurpose('rent')}
-                className={`px-3.5 py-1 text-xs sm:text-sm font-semibold rounded-md transition-all cursor-pointer ${
+                className={`px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                   purpose === 'rent'
                     ? 'bg-white text-[#171717] shadow-sm'
                     : 'text-[#6F6F6F] hover:text-[#171717]'
@@ -164,13 +164,13 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
           </div>
 
-          {/* Compact Form */}
-          <form onSubmit={handleSearchSubmit} className="space-y-2">
+          {/* Search and Filters Form */}
+          <form onSubmit={handleSearchSubmit} className="space-y-3">
             {/* Unified Search Input + Submit Button Row */}
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-2.5">
               <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-3.5 w-3.5 text-[#8A8A8A]" />
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-[#8A8A8A]" />
                 </div>
                 <input
                   type="text"
@@ -178,29 +178,29 @@ export const Hero: React.FC<HeroProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search building, project, or area (e.g. Marina Gate, Downtown, Palm Villa)..."
-                  className="w-full pl-8 pr-3 py-2 bg-[#F9F9F8] border border-[#EAEAEA] rounded-lg text-xs sm:text-sm text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#CF9F5D]/30 focus:border-[#CF9F5D] transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-[#F9F9F8] border border-[#EAEAEA] rounded-xl text-xs sm:text-sm text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#CF9F5D]/30 focus:border-[#CF9F5D] transition-all"
                 />
               </div>
 
               <button
                 type="submit"
                 id="hero-submit-search-btn"
-                className="px-5 py-2 rounded-lg bg-[#171717] hover:bg-[#2A2A2A] active:bg-[#000000] text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all duration-200 shadow-sm hover:shadow cursor-pointer flex-shrink-0"
+                className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] active:bg-[#000000] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow cursor-pointer flex-shrink-0"
               >
-                <Search className="w-3.5 h-3.5 text-[#CF9F5D]" />
+                <Search className="w-4 h-4 text-[#CF9F5D]" />
                 <span>Search</span>
               </button>
             </div>
 
-            {/* Compact Filters Grid Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+            {/* Filters Grid Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
               {/* Location */}
               <div className="relative">
                 <select
                   id="hero-area-select"
                   value={selectedArea}
                   onChange={(e) => setSelectedArea(e.target.value)}
-                  className="w-full pl-2.5 pr-6 py-1.5 bg-white border border-[#EAEAEA] rounded-md text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer truncate"
+                  className="w-full pl-3 pr-8 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer truncate shadow-2xs"
                   title="Location / Area"
                 >
                   <option value="">All Dubai Areas</option>
@@ -210,7 +210,7 @@ export const Hero: React.FC<HeroProps> = ({
                     </option>
                   ))}
                 </select>
-                <MapPin className="w-3 h-3 text-[#8A8A8A] absolute right-2 top-2 pointer-events-none" />
+                <MapPin className="w-3.5 h-3.5 text-[#8A8A8A] absolute right-3 top-3.5 pointer-events-none" />
               </div>
 
               {/* Property Type */}
@@ -219,7 +219,7 @@ export const Hero: React.FC<HeroProps> = ({
                   id="hero-type-select"
                   value={propertyType}
                   onChange={(e) => setPropertyType(e.target.value)}
-                  className="w-full pl-2.5 pr-6 py-1.5 bg-white border border-[#EAEAEA] rounded-md text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer"
+                  className="w-full pl-3 pr-8 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer shadow-2xs"
                   title="Property Type"
                 >
                   <option value="">All Types</option>
@@ -229,7 +229,7 @@ export const Hero: React.FC<HeroProps> = ({
                   <option value="Townhouse">Townhouse</option>
                   <option value="Duplex">Duplex</option>
                 </select>
-                <Home className="w-3 h-3 text-[#8A8A8A] absolute right-2 top-2 pointer-events-none" />
+                <Home className="w-3.5 h-3.5 text-[#8A8A8A] absolute right-3 top-3.5 pointer-events-none" />
               </div>
 
               {/* Bedrooms */}
@@ -238,7 +238,7 @@ export const Hero: React.FC<HeroProps> = ({
                   id="hero-beds-select"
                   value={bedrooms}
                   onChange={(e) => setBedrooms(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-white border border-[#EAEAEA] rounded-md text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer"
+                  className="w-full px-3 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer shadow-2xs"
                   title="Bedrooms"
                 >
                   <option value="">Any Beds</option>
@@ -256,7 +256,7 @@ export const Hero: React.FC<HeroProps> = ({
                   id="hero-price-select"
                   value={priceRange}
                   onChange={(e) => setPriceRange(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-white border border-[#EAEAEA] rounded-md text-xs font-medium text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer truncate"
+                  className="w-full px-3 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer truncate shadow-2xs"
                   title="Price Range"
                 >
                   <option value="">Any Budget</option>
@@ -279,28 +279,28 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
 
             {/* Quick Popular Pills */}
-            <div className="pt-1 flex items-center justify-between gap-2 text-[11px] text-[#6F6F6F] overflow-x-auto pb-0.5">
-              <div className="flex items-center gap-1.5 flex-nowrap">
-                <Sparkles className="w-3 h-3 text-[#CF9F5D] flex-shrink-0" />
-                <span className="text-[#8A8A8A] flex-shrink-0">Popular:</span>
+            <div className="pt-1.5 flex items-center justify-between gap-2 text-xs text-[#6F6F6F] overflow-x-auto pb-0.5">
+              <div className="flex items-center gap-2 flex-nowrap">
+                <Sparkles className="w-3.5 h-3.5 text-[#CF9F5D] flex-shrink-0" />
+                <span className="text-[#8A8A8A] flex-shrink-0 font-medium">Popular:</span>
                 <button
                   type="button"
                   onClick={() => handleQuickPill('Marina Gate', 'dubai-marina', 'Apartment')}
-                  className="px-2 py-0.5 rounded bg-[#F7F7F5] hover:bg-[#EAEAEA] text-[#171717] whitespace-nowrap cursor-pointer transition-colors"
+                  className="px-2.5 py-1 rounded-lg bg-[#F7F7F5] hover:bg-[#EAEAEA] text-[#171717] whitespace-nowrap cursor-pointer transition-colors font-medium"
                 >
                   Marina Gate
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickPill('Burj Khalifa view', 'downtown-dubai', 'Apartment')}
-                  className="px-2 py-0.5 rounded bg-[#F7F7F5] hover:bg-[#EAEAEA] text-[#171717] whitespace-nowrap cursor-pointer transition-colors"
+                  className="px-2.5 py-1 rounded-lg bg-[#F7F7F5] hover:bg-[#EAEAEA] text-[#171717] whitespace-nowrap cursor-pointer transition-colors font-medium"
                 >
                   Downtown Views
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickPill('Beachfront Sky Villa', 'palm-jumeirah', 'Penthouse')}
-                  className="px-2 py-0.5 rounded bg-[#F7F7F5] hover:bg-[#EAEAEA] text-[#171717] whitespace-nowrap cursor-pointer transition-colors"
+                  className="px-2.5 py-1 rounded-lg bg-[#F7F7F5] hover:bg-[#EAEAEA] text-[#171717] whitespace-nowrap cursor-pointer transition-colors font-medium"
                 >
                   Palm Penthouses
                 </button>

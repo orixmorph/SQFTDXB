@@ -22,6 +22,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { Property, ViewingRequestData } from '../types';
+import { PropertyMapSection } from './PropertyMapSection';
 
 interface PropertyDetailModalProps {
   property: Property | null;
@@ -63,15 +64,148 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
     setActiveImageIndex((prev) => (prev - 1 + property.images.length) % property.images.length);
   };
 
-  const handleViewingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setViewingFormSubmitted(true);
-  };
-
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  // Baserow Database Compatibility Resolvers (accepts standard or custom column keys)
+  const displayBedrooms = (() => {
+    const val =
+      property.bedrooms ??
+      property.bedroom ??
+      property.Bedrooms ??
+      property.Bedroom ??
+      property.beds ??
+      property.Beds;
+    if (val === null || val === undefined || val === '') return '—';
+    if (typeof val === 'number') return `${val} Beds`;
+    const str = String(val).trim();
+    return /bed|studio/i.test(str) ? str : `${str} Beds`;
+  })();
+
+  const displayBathrooms = (() => {
+    const val =
+      property.bathrooms ??
+      property.bathroom ??
+      property.Bathrooms ??
+      property.Bathroom ??
+      property.baths ??
+      property.Baths;
+    if (val === null || val === undefined || val === '') return '—';
+    if (typeof val === 'number') return `${val} Baths`;
+    const str = String(val).trim();
+    return /bath/i.test(str) ? str : `${str} Baths`;
+  })();
+
+  const displayTotalArea = (() => {
+    const val =
+      property.sqft ??
+      property.totalArea ??
+      property.total_area ??
+      property.TotalArea ??
+      property.areaSqFt ??
+      property.area_sqft ??
+      property.area;
+    if (val === null || val === undefined || val === '') return '—';
+    if (typeof val === 'number') return `${val.toLocaleString()} sq.ft`;
+    const cleaned = String(val).replace(/,/g, '').trim();
+    const num = parseFloat(cleaned);
+    if (!isNaN(num)) return `${num.toLocaleString()} sq.ft`;
+    return String(val);
+  })();
+
+  const displayFurniture = (() => {
+    const val =
+      property.furnishedStatus ||
+      property.furniture ||
+      property.Furniture ||
+      property.furnishing ||
+      property.Furnishing ||
+      property.furnished;
+    if (val === true) return 'Furnished';
+    if (val === false) return 'Unfurnished';
+    if (typeof val === 'string' && val.trim()) return val.trim();
+    return 'Unfurnished';
+  })();
+
+  const displayParking = (() => {
+    const val =
+      property.parkingSpaces ??
+      property.parking ??
+      property.Parking ??
+      property.parking_spaces;
+    if (val === null || val === undefined || val === '') return '1 Space';
+    if (typeof val === 'number') return `${val} Spaces`;
+    const str = String(val).trim();
+    return /space|bay/i.test(str) ? str : `${str} Spaces`;
+  })();
+
+  const displayExposure = (() => {
+    const val =
+      property.viewType ||
+      property.view ||
+      property.View ||
+      property.exposure ||
+      property.Exposure;
+    return val ? String(val) : 'Prime Dubai View';
+  })();
+
+  const WHATSAPP_NUMBER = '971588648093';
+  const CALL_NUMBER = '+971588648093';
+
+  // Pre-written WhatsApp Message for Request Private Viewing
+  const viewingWhatsAppText = `Hello SQFT DXB,
+
+I would like to request a private viewing for this property:
+
+• Property: ${property.title}
+• Reference No: ${property.referenceNumber || property.reraPermit || property.id}
+• Price: ${property.priceDisplay} (${property.purpose === 'rent' ? 'For Rent' : 'For Sale'})
+• Community: ${property.area}
+• Bedrooms: ${displayBedrooms}
+• Total Area: ${displayTotalArea}
+
+Please let me know the available private viewing inspection slots. Thank you!`;
+
+  const viewingWhatsAppUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(viewingWhatsAppText)}`;
+
+  // Pre-written WhatsApp Message for Quick Agent Inquiry
+  const inquiryWhatsAppText = `Hello SQFT DXB,
+
+I am interested in this ready property:
+• Property: ${property.title}
+• Reference: ${property.referenceNumber || property.reraPermit || property.id}
+• Community: ${property.area}
+• Price: ${property.priceDisplay}
+
+Could you please provide more details and title deed verification? Thank you!`;
+
+  const inquiryWhatsAppUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(inquiryWhatsAppText)}`;
+
+  const handleViewingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setViewingFormSubmitted(true);
+
+    const customText = `Hello SQFT DXB,
+
+I would like to schedule a private viewing:
+
+• Property: ${property.title}
+• Reference No: ${property.referenceNumber || property.reraPermit || property.id}
+• Community: ${property.area}
+• Price: ${property.priceDisplay}
+• Client Name: ${viewingData.fullName}
+• Phone: ${viewingData.phone}
+• Preferred Date: ${viewingData.preferredDate || 'Earliest Available'}
+• Preferred Slot: ${viewingData.preferredTime}
+• Viewing Type: ${viewingData.viewingType}
+
+Please confirm access clearance. Thank you!`;
+
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(customText)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -198,12 +332,21 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
           {/* Core Price & Title Block */}
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-[#F0F0EE]">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#CF9F5D] uppercase tracking-wider">
-                <MapPin className="w-3.5 h-3.5" />
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById('property-map-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="flex items-center gap-2 text-xs font-semibold text-[#CF9F5D] hover:text-[#A67C3D] uppercase tracking-wider transition-colors cursor-pointer group"
+              >
+                <MapPin className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
                 <span>
                   {property.projectName}, {property.area}, Dubai
                 </span>
-              </div>
+                <span className="text-[10px] lowercase font-normal text-[#8A8A8A] group-hover:underline">
+                  (view map pin ↓)
+                </span>
+              </button>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#171717] tracking-tight leading-snug">
                 {property.title}
               </h1>
@@ -244,7 +387,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 Bedrooms
               </span>
               <span className="text-sm font-bold text-[#171717]">
-                {property.bedrooms} Beds
+                {displayBedrooms}
               </span>
             </div>
 
@@ -254,7 +397,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 Bathrooms
               </span>
               <span className="text-sm font-bold text-[#171717]">
-                {property.bathrooms} Baths
+                {displayBathrooms}
               </span>
             </div>
 
@@ -264,7 +407,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 Total Area
               </span>
               <span className="text-sm font-bold text-[#171717]">
-                {property.sqft.toLocaleString()} sq.ft
+                {displayTotalArea}
               </span>
             </div>
 
@@ -274,7 +417,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 Parking
               </span>
               <span className="text-sm font-bold text-[#171717]">
-                {property.parkingSpaces} Spaces
+                {displayParking}
               </span>
             </div>
 
@@ -284,7 +427,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 Furnishing
               </span>
               <span className="text-sm font-bold text-[#171717]">
-                {property.furnishedStatus}
+                {displayFurniture}
               </span>
             </div>
 
@@ -294,7 +437,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 Exposure
               </span>
               <span className="text-sm font-bold text-[#171717] truncate block">
-                {property.viewType}
+                {displayExposure}
               </span>
             </div>
           </div>
@@ -360,6 +503,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   ))}
                 </div>
               </div>
+
+              {/* Map & Neighborhood Pin Section */}
+              <div id="property-map-section" className="pt-2">
+                <PropertyMapSection property={property} />
+              </div>
             </div>
 
             {/* Right 1 Col: Assigned Agent & Viewing Request Card */}
@@ -381,40 +529,53 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                       {property.agent.title}
                     </p>
                     <span className="text-[11px] text-[#CF9F5D] font-semibold">
-                      {property.agent.reraNumber} • {property.agent.verifiedDeals} Deals
+                      {property.agent.verifiedDeals} Deals
                     </span>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-[#EAEAEA] grid grid-cols-2 gap-2">
                   <a
-                    href={`tel:${property.agent.phone}`}
-                    className="py-2.5 px-3 rounded-xl bg-white border border-[#EAEAEA] hover:border-[#171717] text-xs font-semibold text-[#171717] flex items-center justify-center gap-1.5 transition-colors"
+                    href={`tel:${CALL_NUMBER}`}
+                    className="py-2.5 px-3 rounded-xl bg-white border border-[#EAEAEA] hover:border-[#171717] text-xs font-semibold text-[#171717] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Phone className="w-3.5 h-3.5 text-[#CF9F5D]" />
                     <span>Call Agent</span>
                   </a>
 
                   <a
-                    href={`https://wa.me/${property.agent.whatsapp.replace(/\+/g, '')}?text=Hello%20${encodeURIComponent(property.agent.name)},%20I%20am%20interested%20in%20${encodeURIComponent(property.title)}%20(${property.referenceNumber})`}
+                    href={inquiryWhatsAppUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="py-2.5 px-3 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-colors"
+                    className="py-2.5 px-3 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <MessageSquare className="w-3.5 h-3.5 text-[#25D366]" />
                     <span>WhatsApp</span>
                   </a>
                 </div>
 
-                {/* Main CTA */}
-                <button
+                {/* Main CTA: Request Private Viewing redirected to WhatsApp with pre-written property details */}
+                <a
                   id="request-viewing-modal-btn"
-                  onClick={() => setShowViewingForm(true)}
-                  className="w-full py-3.5 px-4 rounded-xl bg-[#CF9F5D] hover:bg-[#c08f4c] text-white font-bold text-sm tracking-wide shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  href={viewingWhatsAppUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-sm tracking-wide shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Calendar className="w-4 h-4" />
+                  <MessageSquare className="w-4 h-4" />
                   <span>Request a Private Viewing</span>
-                </button>
+                </a>
+
+                <div className="flex items-center justify-center pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowViewingForm(!showViewingForm)}
+                    className="text-[11px] text-[#8A8A8A] hover:text-[#171717] underline underline-offset-2 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <Calendar className="w-3 h-3 text-[#CF9F5D]" />
+                    <span>{showViewingForm ? 'Hide schedule form' : 'Or choose specific inspection date & time slot'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Ready Buyer Advisory Tip */}
@@ -451,23 +612,34 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
               </div>
 
               {viewingFormSubmitted ? (
-                <div className="p-6 rounded-xl bg-white border border-green-200 text-center space-y-2">
+                <div className="p-6 rounded-xl bg-white border border-green-200 text-center space-y-3">
                   <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto" />
                   <h4 className="text-base font-bold text-[#171717]">
-                    Viewing Request Confirmed!
+                    Viewing Request Forwarded!
                   </h4>
                   <p className="text-xs text-[#6F6F6F] max-w-md mx-auto">
-                    Thank you {viewingData.fullName}. {property.agent.name} will contact you at {viewingData.phone} shortly to confirm access clearance and coordinate building security passes.
+                    Thank you {viewingData.fullName}. Your viewing slot for {property.title} has been forwarded to WhatsApp (+971 58 864 8093).
                   </p>
-                  <button
-                    onClick={() => {
-                      setShowViewingForm(false);
-                      setViewingFormSubmitted(false);
-                    }}
-                    className="mt-3 px-4 py-2 rounded-lg bg-[#171717] text-white text-xs font-semibold"
-                  >
-                    Done
-                  </button>
+                  <div className="flex items-center justify-center gap-2 pt-2">
+                    <a
+                      href={viewingWhatsAppUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-4 py-2 rounded-lg bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>Chat on WhatsApp</span>
+                    </a>
+                    <button
+                      onClick={() => {
+                        setShowViewingForm(false);
+                        setViewingFormSubmitted(false);
+                      }}
+                      className="px-4 py-2 rounded-lg bg-[#F7F7F5] border border-[#EAEAEA] text-[#171717] text-xs font-semibold hover:bg-white"
+                    >
+                      Done
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleViewingSubmit} className="space-y-3">
@@ -585,9 +757,10 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     </button>
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] text-white text-xs font-bold transition-colors shadow-sm"
+                      className="px-6 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-bold transition-colors shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
                     >
-                      Confirm Viewing Request
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>Confirm & Open WhatsApp</span>
                     </button>
                   </div>
                 </form>

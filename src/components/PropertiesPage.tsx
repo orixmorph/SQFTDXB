@@ -171,11 +171,11 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
         </div>
 
         {/* Desktop Filter Bar */}
-        <div className="bg-[#F7F7F5] rounded-2xl p-4 sm:p-5 border border-[#EAEAEA] mb-8 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="bg-[#F7F7F5] rounded-2xl p-5 sm:p-6 border border-[#EAEAEA] mb-8 space-y-4 shadow-2xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-3.5">
             {/* Search Input */}
             <div className="relative">
-              <label className="block text-[11px] font-semibold text-[#8A8A8A] uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-1.5">
                 Search
               </label>
               <div className="relative">
@@ -184,21 +184,21 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Building, project, or keyword..."
-                  className="w-full pl-8 pr-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:border-[#CF9F5D]"
+                  className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:border-[#CF9F5D] focus:ring-1 focus:ring-[#CF9F5D]/30 shadow-2xs transition-all"
                 />
-                <Search className="w-3.5 h-3.5 text-[#8A8A8A] absolute left-2.5 top-3" />
+                <Search className="w-4 h-4 text-[#8A8A8A] absolute left-3 top-3.5 pointer-events-none" />
               </div>
             </div>
 
             {/* Community Area */}
             <div>
-              <label className="block text-[11px] font-semibold text-[#8A8A8A] uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-1.5">
                 Community
               </label>
               <select
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-medium text-[#171717] focus:outline-none focus:border-[#CF9F5D] cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm font-medium text-[#171717] focus:outline-none focus:border-[#CF9F5D] focus:ring-1 focus:ring-[#CF9F5D]/30 cursor-pointer shadow-2xs transition-all"
               >
                 <option value="">All Dubai Communities</option>
                 {areas.map((a) => (
@@ -211,13 +211,13 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
 
             {/* Property Type */}
             <div>
-              <label className="block text-[11px] font-semibold text-[#8A8A8A] uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-1.5">
                 Property Type
               </label>
               <select
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-medium text-[#171717] focus:outline-none focus:border-[#CF9F5D] cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm font-medium text-[#171717] focus:outline-none focus:border-[#CF9F5D] focus:ring-1 focus:ring-[#CF9F5D]/30 cursor-pointer shadow-2xs transition-all"
               >
                 <option value="">All Residential Types</option>
                 <option value="Apartment">Apartment</option>
@@ -230,13 +230,13 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
 
             {/* Bedrooms */}
             <div>
-              <label className="block text-[11px] font-semibold text-[#8A8A8A] uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-1.5">
                 Bedrooms
               </label>
               <select
                 value={bedrooms}
                 onChange={(e) => setBedrooms(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-medium text-[#171717] focus:outline-none focus:border-[#CF9F5D] cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm font-medium text-[#171717] focus:outline-none focus:border-[#CF9F5D] focus:ring-1 focus:ring-[#CF9F5D]/30 cursor-pointer shadow-2xs transition-all"
               >
                 <option value="">Any Bedrooms</option>
                 <option value="1">1 Bed</option>
@@ -249,13 +249,13 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
 
             {/* Price Budget */}
             <div>
-              <label className="block text-[11px] font-semibold text-[#8A8A8A] uppercase mb-1">
+              <label className="block text-[11px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-1.5">
                 Budget (AED)
               </label>
               <select
                 value={priceBudget}
                 onChange={(e) => setPriceBudget(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-medium text-[#171717] focus:outline-none focus:border-[#CF9F5D] cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm font-medium text-[#171717] focus:outline-none focus:border-[#CF9F5D] focus:ring-1 focus:ring-[#CF9F5D]/30 cursor-pointer shadow-2xs transition-all"
               >
                 <option value="">Any Budget</option>
                 {purpose === 'buy' ? (

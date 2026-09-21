@@ -29,8 +29,13 @@ export interface Property {
   priceDisplay: string;
   priceUnit?: string; // e.g. '/ year' for rent
   bedrooms: number;
+  bedroom?: number | string;
   bathrooms: number;
+  bathroom?: number | string;
   sqft: number;
+  totalArea?: number | string;
+  total_area?: number | string;
+  areaSqFt?: number | string;
   pricePerSqft?: number;
   images: string[];
   isVerified: boolean;
@@ -43,12 +48,23 @@ export interface Property {
   floor?: string;
   parkingSpaces: number;
   furnishedStatus: FurnishedStatus;
+  furniture?: string;
+  furnishing?: string;
   viewType: string;
   reraPermit: string;
   referenceNumber: string;
   agent: Agent;
   isFeatured?: boolean;
   createdAt: string;
+  latitude?: number | string;
+  longitude?: number | string;
+  location?: {
+    lat: number;
+    lng: number;
+    address?: string;
+    landmark?: string;
+  };
+  [key: string]: any;
 }
 
 export interface Area {

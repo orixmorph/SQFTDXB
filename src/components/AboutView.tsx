@@ -106,10 +106,8 @@ export const AboutView: React.FC<AboutViewProps> = ({
                 />
                 <h3 className="text-lg font-bold text-[#171717]">{agent.name}</h3>
                 <p className="text-xs text-[#6F6F6F] font-medium">{agent.title}</p>
-                <div className="mt-3 pt-3 border-t border-[#F0F0EE] flex items-center justify-center gap-3 text-xs text-[#8A8A8A]">
-                  <span className="font-semibold text-[#171717]">{agent.reraNumber}</span>
-                  <span>•</span>
-                  <span>{agent.verifiedDeals} Verified Deals</span>
+                <div className="mt-3 pt-3 border-t border-[#F0F0EE] flex items-center justify-center text-xs text-[#8A8A8A]">
+                  <span className="font-semibold text-[#CF9F5D]">{agent.verifiedDeals} Verified Deals</span>
                 </div>
               </div>
             ))}
@@ -136,7 +134,7 @@ export const AboutView: React.FC<AboutViewProps> = ({
             </button>
             <button
               onClick={onOpenListProperty}
-              className="px-6 py-3 rounded-xl bg-[#CF9F5D] hover:bg-[#c08f4c] text-white font-bold text-xs transition-colors"
+              className="px-6 py-3 rounded-xl bg-[#CF9F5D] hover:bg-[#BE8E4D] active:bg-[#AB7E3F] text-white font-bold text-xs transition-all duration-200 shadow-sm hover:shadow-[0_4px_14px_rgba(207,159,93,0.35)] cursor-pointer"
             >
               List Your Property
             </button>

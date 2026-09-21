@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, ArrowUpRight, Bed, Bath, Maximize2, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Heart, ArrowUpRight, Bed, Bath, Maximize2, ShieldCheck, CheckCircle2, MapPin } from 'lucide-react';
 import { Property } from '../types';
 
 interface PropertyCardProps {
@@ -102,9 +102,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           </div>
 
           {/* Project & Community */}
-          <p className="text-xs font-semibold text-[#CF9F5D] uppercase tracking-wider mb-1">
-            {property.projectName} • {property.area}
-          </p>
+          <div className="flex items-center gap-1 text-xs font-semibold text-[#CF9F5D] uppercase tracking-wider mb-1">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{property.projectName} • {property.area}</span>
+          </div>
 
           {/* Title */}
           <h3 className="text-base font-semibold text-[#171717] leading-snug line-clamp-1 mb-4 group-hover:text-[#CF9F5D] transition-colors duration-200">
@@ -117,17 +118,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           <div className="flex items-center gap-3 font-medium">
             <span className="flex items-center gap-1">
               <Bed className="w-3.5 h-3.5 text-[#8A8A8A]" />
-              {property.bedrooms} Beds
+              {property.bedrooms ?? property.bedroom ?? '—'} Beds
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
               <Bath className="w-3.5 h-3.5 text-[#8A8A8A]" />
-              {property.bathrooms} Baths
+              {property.bathrooms ?? property.bathroom ?? '—'} Baths
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
               <Maximize2 className="w-3.5 h-3.5 text-[#8A8A8A]" />
-              {property.sqft.toLocaleString()} sq.ft
+              {typeof (property.sqft ?? property.totalArea ?? property.total_area) === 'number'
+                ? `${(property.sqft ?? property.totalArea ?? property.total_area)?.toLocaleString()} sq.ft`
+                : (property.sqft ?? property.totalArea ?? property.total_area ?? '—')}
             </span>
           </div>
 

@@ -42,8 +42,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header
       className={`sticky top-0 z-40 w-full transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-b border-[#EAEAEA]'
-          : 'bg-white border-b border-[#F0F0EE]'
+          ? 'bg-black/95 backdrop-blur-md shadow-[0_4px_25px_rgba(0,0,0,0.5)] border-b border-[#222222]'
+          : 'bg-black border-b border-[#1A1A1A]'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,9 +57,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label="SQFT DXB Home"
             >
               <img
-                src="https://res.cloudinary.com/dy6km7beb/image/upload/v1787668456/Screenshot_2026-08-25_at_6.34.07_pm_mfn070.png"
+                src="https://res.cloudinary.com/dy6km7beb/image/upload/v1789980615/Untitled_design_11_ocowpa.png"
                 alt="SQFT DXB - Real Estate"
-                className="h-7 sm:h-8.5 w-auto object-contain rounded-lg transition-transform duration-300 group-hover:scale-105"
+                className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 referrerPolicy="no-referrer"
               />
             </button>
@@ -74,8 +74,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={item.action}
                 className={`px-3.5 py-2 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer ${
                   item.active
-                    ? 'text-[#171717] bg-[#F7F7F5] font-semibold'
-                    : 'text-[#4A4A4A] hover:text-[#171717] hover:bg-[#FAFAF9]'
+                    ? 'text-white bg-white/15 font-semibold'
+                    : 'text-[#C4C4C4] hover:text-white hover:bg-white/10'
                 }`}
               >
                 {item.label}
@@ -107,9 +107,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="nav-list-property-btn"
               onClick={() => onOpenListProperty('buy')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#171717] hover:bg-[#2A2A2A] active:bg-[#0A0A0A] transition-all duration-200 shadow-sm hover:shadow cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#CF9F5D] hover:bg-[#BE8E4D] active:bg-[#AB7E3F] transition-all duration-200 shadow-sm hover:shadow-[0_4px_14px_rgba(207,159,93,0.35)] cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-[#CF9F5D]" />
+              <Plus className="w-4 h-4 text-white" />
               <span>List Your Property</span>
             </button>
           </div>
@@ -136,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="mobile-menu-toggle-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-[#171717] hover:bg-[#F7F7F5] focus:outline-none"
+              className="p-2 rounded-lg text-white hover:bg-white/10 focus:outline-none cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -147,7 +147,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#EAEAEA] bg-white px-4 pt-3 pb-6 space-y-3 shadow-lg animate-in slide-in-from-top-2 duration-200">
+        <div className="md:hidden border-t border-[#222222] bg-[#0A0A0A] px-4 pt-3 pb-6 space-y-3 shadow-2xl animate-in slide-in-from-top-2 duration-200">
           <div className="grid grid-cols-2 gap-2 pb-2">
             <button
               id="mobile-nav-buy"
@@ -155,7 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('properties', { purpose: 'buy' });
                 setMobileMenuOpen(false);
               }}
-              className="flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-[#F7F7F5] text-sm font-semibold text-[#171717]"
+              className="flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-[#181818] hover:bg-[#222222] border border-[#2E2E2E] text-sm font-semibold text-white cursor-pointer transition-colors"
             >
               <span>Ready for Sale</span>
             </button>
@@ -165,7 +165,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('properties', { purpose: 'rent' });
                 setMobileMenuOpen(false);
               }}
-              className="flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-[#F7F7F5] text-sm font-semibold text-[#171717]"
+              className="flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-[#181818] hover:bg-[#222222] border border-[#2E2E2E] text-sm font-semibold text-white cursor-pointer transition-colors"
             >
               <span>Ready for Rent</span>
             </button>
@@ -178,10 +178,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('properties');
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#171717] hover:bg-[#F7F7F5]"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#E0E0E0] hover:text-white hover:bg-white/10 cursor-pointer"
             >
               <span>All Secondary Properties</span>
-              <ChevronRight className="w-4 h-4 text-[#8A8A8A]" />
+              <ChevronRight className="w-4 h-4 text-[#888888]" />
             </button>
 
             <button
@@ -190,10 +190,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('areas');
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#171717] hover:bg-[#F7F7F5]"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#E0E0E0] hover:text-white hover:bg-white/10 cursor-pointer"
             >
               <span>Trending Dubai Areas</span>
-              <ChevronRight className="w-4 h-4 text-[#8A8A8A]" />
+              <ChevronRight className="w-4 h-4 text-[#888888]" />
             </button>
 
             <button
@@ -202,10 +202,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('blog');
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#171717] hover:bg-[#F7F7F5]"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#E0E0E0] hover:text-white hover:bg-white/10 cursor-pointer"
             >
               <span>Blog & Insights</span>
-              <ChevronRight className="w-4 h-4 text-[#8A8A8A]" />
+              <ChevronRight className="w-4 h-4 text-[#888888]" />
             </button>
 
             <button
@@ -214,10 +214,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('about');
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#171717] hover:bg-[#F7F7F5]"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#E0E0E0] hover:text-white hover:bg-white/10 cursor-pointer"
             >
               <span>About SQFT DXB</span>
-              <ChevronRight className="w-4 h-4 text-[#8A8A8A]" />
+              <ChevronRight className="w-4 h-4 text-[#888888]" />
             </button>
 
             <button
@@ -226,37 +226,37 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('contact');
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#171717] hover:bg-[#F7F7F5]"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#E0E0E0] hover:text-white hover:bg-white/10 cursor-pointer"
             >
               <span>Contact Advisors</span>
-              <ChevronRight className="w-4 h-4 text-[#8A8A8A]" />
+              <ChevronRight className="w-4 h-4 text-[#888888]" />
             </button>
           </div>
 
-          <div className="pt-2 border-t border-[#F0F0EE] space-y-3">
+          <div className="pt-2 border-t border-[#222222] space-y-3">
             <button
               id="mobile-nav-list-btn"
               onClick={() => {
                 onOpenListProperty('buy');
                 setMobileMenuOpen(false);
               }}
-              className="w-full py-3 px-4 rounded-lg bg-[#171717] text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-3 px-4 rounded-lg bg-[#CF9F5D] hover:bg-[#BE8E4D] active:bg-[#AB7E3F] text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all duration-200 cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-[#CF9F5D]" />
+              <Plus className="w-4 h-4 text-white" />
               <span>List Your Property</span>
             </button>
 
-            <div className="text-center text-[11px] text-[#8A8A8A] pt-1">
+            <div className="text-center text-[11px] text-[#888888] pt-1">
               Powered by{' '}
               <a
                 href="https://jamokaproperties.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#171717] font-semibold underline underline-offset-2 decoration-[#CF9F5D]/50"
+                className="text-white font-semibold underline underline-offset-2 decoration-[#CF9F5D]"
               >
                 Jamoka Properties
               </a>
-              <span className="block text-[10px] text-[#9A9A9A] mt-0.5">RERA ORN: 49679</span>
+              <span className="block text-[10px] text-[#777777] mt-0.5">RERA ORN: 49679</span>
             </div>
           </div>
         </div>
