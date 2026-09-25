@@ -51,6 +51,10 @@ export async function sendLeadToServer(
   // Save local redundancy backup
   saveLocalInquiryBackup(payload);
 
+  const webhookUrl =
+    (import.meta as any).env?.VITE_GOOGLE_SHEETS_WEBHOOK_URL ||
+    'https://script.google.com/macros/s/AKfycbwMWhgsLu7yxvBRkshcJ-ARS5XKU3RlyDnhucKJm7qNmGBI_EI4foYIE1KM6qOEo0Sm/exec';
+
   try {
     const response = await fetch('/api/submit-lead', {
       method: 'POST',
@@ -69,14 +73,29 @@ export async function sendLeadToServer(
         success: true,
         message: data.message || 'Your inquiry has been received and logged successfully.',
       };
-    } else {
-      return {
-        success: true,
-        message: 'Your inquiry has been safely received.',
-      };
     }
-  } catch (error: any) {
-    // Even if offline, backup is safely stored in browser
+  } catch {
+    // Backend proxy not reachable (static host)
+  }
+
+  // Failover: Direct post to Google Apps Script webhook
+  try {
+    if (webhookUrl) {
+      await fetch(webhookUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...payload,
+          submittedAt: new Date().toISOString(),
+        }),
+      });
+    }
+    return {
+      success: true,
+      message: 'Your inquiry has been safely received and logged.',
+    };
+  } catch {
     return {
       success: true,
       message: 'Your inquiry has been safely received and queued for immediate follow-up.',

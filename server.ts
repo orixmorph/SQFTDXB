@@ -152,7 +152,8 @@ app.post('/api/submit-lead', async (req, res) => {
  */
 app.get('/api/status', (req, res) => {
   const hasToken = Boolean(process.env.BASEROW_API_TOKEN);
-  const tableId = process.env.BASEROW_TABLE_ID || '1210846';
+  const rawTableId = process.env.BASEROW_TABLE_ID || '1210850';
+  const tableId = rawTableId === '1210846' ? '1210850' : rawTableId;
   res.json({
     status: 'ok',
     baserowConfigured: hasToken,
@@ -188,10 +189,12 @@ async function startServer() {
     });
   }
 
+  const activeTableId = (process.env.BASEROW_TABLE_ID === '1210846' || !process.env.BASEROW_TABLE_ID) ? '1210850' : process.env.BASEROW_TABLE_ID;
+
   app.listen(PORT, HOST, () => {
     console.log(`[SQFT DXB Server] Server running at http://${HOST}:${PORT}`);
     console.log(`[SQFT DXB Server] Baserow API Token status: ${process.env.BASEROW_API_TOKEN ? 'Configured' : 'Pending'}`);
-    console.log(`[SQFT DXB Server] Table ID: ${process.env.BASEROW_TABLE_ID || '1210846'}`);
+    console.log(`[SQFT DXB Server] Properties Table ID: ${activeTableId}`);
   });
 }
 

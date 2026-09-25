@@ -1,5 +1,6 @@
 import { Property, Agent, Area } from '../types';
 import { properties as fallbackProperties, agents as fallbackAgents, areas as fallbackAreas } from '../data/mockData';
+import { fetchDirectBaserowProperties } from './baserowClient';
 
 export interface PropertiesResponse {
   properties: Property[];
@@ -8,10 +9,14 @@ export interface PropertiesResponse {
 }
 
 /**
- * Fetches all live properties from our secure server-side API proxy.
- * The server communicates with Baserow and filters out non-LIVE records.
+ * Fetches all live properties.
+ * 1. Tries Express backend proxy (/api/properties)
+ * 2. If backend is not available (e.g. static hosting, Vercel/Netlify static, network error, or 404),
+ *    immediately fails over to direct Baserow API (table 1210850)
+ * 3. Gracefully falls back to pre-seeded verified catalog if completely offline
  */
 export async function fetchLiveProperties(forceRefresh = false): Promise<PropertiesResponse> {
+  // 1. Try server proxy endpoint first
   try {
     const url = `/api/properties${forceRefresh ? '?refresh=true' : ''}`;
     const res = await fetch(url, {
@@ -20,37 +25,39 @@ export async function fetchLiveProperties(forceRefresh = false): Promise<Propert
       },
     });
 
-    if (!res.ok) {
-      console.warn(`[PropertyService] Server returned status ${res.status}, using verified catalog.`);
-      return {
-        properties: fallbackProperties,
-        source: 'fallback',
-        totalLive: fallbackProperties.length,
-      };
+    if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          return {
+            properties: data.data,
+            source: data.source || 'baserow',
+            totalLive: data.count || data.data.length,
+          };
+        }
+      }
     }
-
-    const data = await res.json();
-    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-      return {
-        properties: data.data,
-        source: data.source || 'baserow',
-        totalLive: data.count || data.data.length,
-      };
-    }
-
-    return {
-      properties: fallbackProperties,
-      source: 'fallback',
-      totalLive: fallbackProperties.length,
-    };
-  } catch (error) {
-    console.warn('[PropertyService] Network error fetching properties, using fallback catalog:', error);
-    return {
-      properties: fallbackProperties,
-      source: 'fallback',
-      totalLive: fallbackProperties.length,
-    };
+  } catch {
+    // Backend proxy not reachable (expected on static deployments)
   }
+
+  // 2. Failover: Query Baserow API directly from browser (CORS supported)
+  try {
+    const directResult = await fetchDirectBaserowProperties(forceRefresh);
+    if (directResult.properties.length > 0) {
+      return directResult;
+    }
+  } catch (directErr) {
+    console.warn('[PropertyService] Direct Baserow fetch failed, using pre-seeded catalog:', directErr);
+  }
+
+  // 3. Fallback: Pre-seeded verified properties
+  return {
+    properties: fallbackProperties,
+    source: 'fallback',
+    totalLive: fallbackProperties.length,
+  };
 }
 
 /**
@@ -64,13 +71,29 @@ export async function fetchPropertyById(id: string): Promise<Property | null> {
       },
     });
 
-    if (!res.ok) return null;
-
-    const data = await res.json();
-    return data.success && data.data ? data.data : null;
+    if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data.success && data.data) return data.data;
+      }
+    }
   } catch {
-    return null;
+    // Ignore server error, proceed to fallback lookup
   }
+
+  // Check in-memory/direct properties
+  try {
+    const direct = await fetchDirectBaserowProperties();
+    const found = direct.properties.find(
+      (p) => p.id === id || p.slug === id || String(p.baserowRowId) === id
+    );
+    if (found) return found;
+  } catch {
+    // Ignore
+  }
+
+  return fallbackProperties.find((p) => p.id === id || p.slug === id) || null;
 }
 
 /**
@@ -85,20 +108,36 @@ export async function fetchLiveAgents(forceRefresh = false): Promise<Agent[]> {
       },
     });
 
-    if (!res.ok) {
-      return fallbackAgents;
+    if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          return data.data;
+        }
+      }
     }
-
-    const data = await res.json();
-    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-      return data.data;
-    }
-
-    return fallbackAgents;
-  } catch (error) {
-    console.warn('[PropertyService] Network error fetching agents:', error);
-    return fallbackAgents;
+  } catch {
+    // Backend not reachable
   }
+
+  // Use agents derived from direct Baserow properties
+  try {
+    const direct = await fetchDirectBaserowProperties(forceRefresh);
+    const agentMap = new Map<string, Agent>();
+    for (const p of direct.properties) {
+      if (p.agent && !agentMap.has(p.agent.name)) {
+        agentMap.set(p.agent.name, p.agent);
+      }
+    }
+    if (agentMap.size > 0) {
+      return Array.from(agentMap.values());
+    }
+  } catch {
+    // Ignore
+  }
+
+  return fallbackAgents;
 }
 
 /**
