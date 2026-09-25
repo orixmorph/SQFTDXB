@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { MapPin, ArrowRight, ArrowUpRight, Search, Building2 } from 'lucide-react';
 import { Area } from '../types';
-import { areas } from '../data/mockData';
+import { areas as defaultAreas } from '../data/mockData';
 
 interface AreasPageProps {
   onSelectArea: (areaId: string) => void;
+  areas?: Area[];
 }
 
-export const AreasPage: React.FC<AreasPageProps> = ({ onSelectArea }) => {
+export const AreasPage: React.FC<AreasPageProps> = ({
+  onSelectArea,
+  areas = defaultAreas,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredAreas = areas.filter((area) => {
@@ -15,8 +19,8 @@ export const AreasPage: React.FC<AreasPageProps> = ({ onSelectArea }) => {
     const q = searchQuery.toLowerCase();
     return (
       area.name.toLowerCase().includes(q) ||
-      area.description.toLowerCase().includes(q) ||
-      area.landmark.toLowerCase().includes(q)
+      (area.description || '').toLowerCase().includes(q) ||
+      (area.landmark || '').toLowerCase().includes(q)
     );
   });
 
@@ -73,7 +77,7 @@ export const AreasPage: React.FC<AreasPageProps> = ({ onSelectArea }) => {
 
                 <div className="absolute bottom-4 left-5 right-5 text-white">
                   <span className="px-2.5 py-0.5 rounded-full bg-white/25 backdrop-blur-md text-[11px] font-semibold text-white inline-block mb-1">
-                    {area.readyCount} Ready Properties
+                    {area.readyCount} {area.readyCount === 1 ? 'Ready Property' : 'Ready Properties'}
                   </span>
                   <h3 className="text-xl sm:text-2xl font-bold tracking-tight">
                     {area.name}
@@ -89,36 +93,31 @@ export const AreasPage: React.FC<AreasPageProps> = ({ onSelectArea }) => {
 
                 <div className="pt-3 border-t border-[#F0F0EE] space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#8A8A8A]">Avg. Secondary Rate:</span>
-                    <span className="font-bold text-[#171717]">
-                      AED {area.avgPriceSqft.toLocaleString()} / sq.ft
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs">
                     <span className="text-[#8A8A8A]">Key Landmark:</span>
-                    <span className="font-medium text-[#171717] truncate max-w-[180px]">
+                    <span className="font-medium text-[#171717] truncate max-w-[200px]">
                       {area.landmark}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs pt-1">
-                    <span className="text-[#8A8A8A]">Property Types:</span>
-                    <div className="flex gap-1 flex-wrap justify-end">
-                      {area.popularTypes.map((type, i) => (
-                        <span
-                          key={i}
-                          className="px-2 py-0.5 rounded bg-[#F7F7F5] text-[10px] font-semibold text-[#171717]"
-                        >
-                          {type}
-                        </span>
-                      ))}
+                  {area.popularTypes && area.popularTypes.length > 0 && (
+                    <div className="flex items-center justify-between text-xs pt-1">
+                      <span className="text-[#8A8A8A]">Property Types:</span>
+                      <div className="flex gap-1 flex-wrap justify-end">
+                        {area.popularTypes.map((type, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-0.5 rounded bg-[#F7F7F5] text-[10px] font-semibold text-[#171717]"
+                          >
+                            {type}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="pt-2">
-                  <button className="w-full py-2.5 rounded-xl bg-[#F7F7F5] group-hover:bg-[#171717] group-hover:text-white text-xs font-bold text-[#171717] transition-colors flex items-center justify-center gap-1.5">
+                  <button className="w-full py-2.5 rounded-xl bg-[#F7F7F5] group-hover:bg-[#171717] group-hover:text-white text-xs font-bold text-[#171717] transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
                     <span>View Available Properties</span>
                     <ArrowRight className="w-3.5 h-3.5 text-[#CF9F5D]" />
                   </button>

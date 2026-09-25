@@ -17,11 +17,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenListProperty }
             <div className="flex flex-col items-start gap-2">
               <img
                 src="https://res.cloudinary.com/dy6km7beb/image/upload/v1789980615/Untitled_design_11_ocowpa.png"
-                alt="SQFT DXB - Real Estate"
+                alt="SQFT DXB - WE FIND, YOU MOVE IN"
                 className="h-10 sm:h-12 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
-              <div className="flex items-center gap-1.5 text-xs text-[#A3A3A3] mt-1">
+              <p className="text-xs font-semibold text-[#CF9F5D] tracking-wider">
+                SQFT DXB • <span className="font-bold">WE FIND, YOU MOVE IN</span>
+              </p>
+              <div className="flex items-center gap-1.5 text-xs text-[#A3A3A3]">
                 <span>Powered by</span>
                 <a
                   href="https://jamokaproperties.com"
@@ -35,12 +38,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenListProperty }
             </div>
 
             <p className="text-xs sm:text-sm text-[#A3A3A3] leading-relaxed max-w-sm">
-              SQFT DXB is Dubai’s specialized real estate brand dedicated solely to secondary-market and ready-to-move properties. Verified title deeds, real photography, transparent pricing, and immediate key handover across Dubai’s prime communities.
+              SQFT DXB is Dubai’s specialized real estate brokerage dedicated to verified secondary-market residences, commercial spaces, and ready-to-move properties. Verified title deeds, transparent pricing, and immediate key handover across Dubai’s prime communities.
             </p>
 
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#141414] border border-[#2A2A2A] text-[11px] text-[#D4D4D4] font-medium shadow-sm">
               <ShieldCheck className="w-3.5 h-3.5 text-[#CF9F5D]" />
-              <span>RERA Registered Secondary Broker • ORN 49679 • Powered by Jamoka Properties</span>
+              <span>RERA Registered Secondary & Commercial Broker • ORN 49679 • Powered by Jamoka Properties</span>
             </div>
           </div>
 
@@ -191,7 +194,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenListProperty }
                 </button>
               </li>
               <li>
-                <span className="text-[#737373]">Boulevard Plaza, Downtown Dubai</span>
+                <span className="text-[#737373]">Bayswater Tower, 8th & 11th Floor, Business Bay</span>
               </li>
               <li>
                 <a

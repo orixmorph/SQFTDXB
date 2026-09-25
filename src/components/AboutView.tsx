@@ -10,16 +10,19 @@ import {
   ArrowRight,
   TrendingUp,
 } from 'lucide-react';
-import { agents } from '../data/mockData';
+import { Agent } from '../types';
+import { agents as defaultAgents } from '../data/mockData';
 
 interface AboutViewProps {
-  onNavigateToProperties: () => void;
+  onNavigateToProperties: (agentName?: string) => void;
   onOpenListProperty: () => void;
+  agents?: Agent[];
 }
 
 export const AboutView: React.FC<AboutViewProps> = ({
   onNavigateToProperties,
   onOpenListProperty,
+  agents = defaultAgents,
 }) => {
   return (
     <div className="w-full min-h-screen bg-white py-12 md:py-20">
@@ -28,14 +31,16 @@ export const AboutView: React.FC<AboutViewProps> = ({
         <div className="max-w-3xl mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F7F7F5] border border-[#EAEAEA] text-xs font-semibold text-[#171717] mb-4">
             <span className="w-2 h-2 rounded-full bg-[#CF9F5D]" />
-            <span>Our Mission & Secondary Philosophy</span>
+            <span className="font-bold">SQFT DXB</span>
+            <span className="text-[#8A8A8A] font-normal">•</span>
+            <span className="text-[#CF9F5D] font-bold tracking-wide">WE FIND, YOU MOVE IN</span>
             <span className="text-[#8A8A8A] font-normal">• Powered by Jamoka Properties (RERA ORN 49679)</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#171717] tracking-tight leading-tight">
-            Real Properties. Real Details. Zero Speculation.
+            WE FIND, YOU MOVE IN. <span className="text-[#CF9F5D]">Real Properties. Real Details.</span>
           </h1>
           <p className="text-base sm:text-lg text-[#6F6F6F] mt-4 leading-relaxed">
-            SQFT DXB was founded to cut through the noise of off-plan brochures and promotional launches. Powered by <a href="https://jamokaproperties.com" target="_blank" rel="noopener noreferrer" className="font-bold text-[#171717] hover:text-[#CF9F5D] underline underline-offset-4 decoration-[#CF9F5D]/50 transition-colors">Jamoka Properties</a>, we are Dubai’s modern PropTech advisory dedicated exclusively to secondary-market and ready-to-move residential properties.
+            SQFT DXB was founded to cut through the noise of off-plan brochures and promotional launches. Powered by <a href="https://jamokaproperties.com" target="_blank" rel="noopener noreferrer" className="font-bold text-[#171717] hover:text-[#CF9F5D] underline underline-offset-4 decoration-[#CF9F5D]/50 transition-colors">Jamoka Properties</a>, we are Dubai’s dedicated brokerage for verified secondary-market residences, commercial spaces, and ready-to-move properties.
           </p>
         </div>
 
@@ -88,29 +93,41 @@ export const AboutView: React.FC<AboutViewProps> = ({
               Meet the SQFT DXB Advisory Team
             </h2>
             <p className="text-sm text-[#6F6F6F] mt-2">
-              Our specialists hold decades of combined expertise in Dubai's premier residential secondary market.
+              Our specialists hold verified portfolios of secondary residences across Dubai's prime neighborhoods.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {agents.map((agent) => (
-              <div
-                key={agent.id}
-                className="p-6 rounded-3xl bg-white border border-[#EAEAEA] hover:border-[#CF9F5D]/50 hover:shadow-lg transition-all text-center"
-              >
-                <img
-                  src={agent.photo}
-                  alt={agent.name}
-                  referrerPolicy="no-referrer"
-                  className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-2 border-[#CF9F5D]"
-                />
-                <h3 className="text-lg font-bold text-[#171717]">{agent.name}</h3>
-                <p className="text-xs text-[#6F6F6F] font-medium">{agent.title}</p>
-                <div className="mt-3 pt-3 border-t border-[#F0F0EE] flex items-center justify-center text-xs text-[#8A8A8A]">
-                  <span className="font-semibold text-[#CF9F5D]">{agent.verifiedDeals} Verified Deals</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {agents.map((agent) => {
+              const liveCount = agent.propertyCount ?? agent.verifiedDeals ?? 0;
+              return (
+                <div
+                  key={agent.id}
+                  onClick={() => onNavigateToProperties(agent.name)}
+                  className="group p-6 rounded-3xl bg-white border border-[#EAEAEA] hover:border-[#CF9F5D] hover:shadow-lg transition-all text-center flex flex-col justify-between cursor-pointer"
+                >
+                  <div>
+                    <img
+                      src={agent.photo}
+                      alt={agent.name}
+                      referrerPolicy="no-referrer"
+                      className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-2 border-[#CF9F5D] transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <h3 className="text-lg font-bold text-[#171717]">{agent.name}</h3>
+                    <p className="text-xs text-[#6F6F6F] font-medium mt-0.5">{agent.title}</p>
+                  </div>
+
+                  <div className="mt-5 pt-3 border-t border-[#F0F0EE] flex flex-col items-center gap-1.5">
+                    <span className="px-3 py-1 rounded-full bg-[#F7F7F5] group-hover:bg-[#171717] group-hover:text-white text-xs font-bold text-[#CF9F5D] transition-colors">
+                      {liveCount} {liveCount === 1 ? 'Ready Property' : 'Ready Properties'}
+                    </span>
+                    <span className="text-[11px] text-[#8A8A8A]">
+                      View Advisor's Portfolio →
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -127,8 +144,8 @@ export const AboutView: React.FC<AboutViewProps> = ({
 
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <button
-              onClick={onNavigateToProperties}
-              className="px-6 py-3 rounded-xl bg-white text-[#171717] hover:bg-[#F7F7F5] font-bold text-xs transition-colors"
+              onClick={() => onNavigateToProperties()}
+              className="px-6 py-3 rounded-xl bg-white text-[#171717] hover:bg-[#F7F7F5] font-bold text-xs transition-colors cursor-pointer"
             >
               Browse Properties
             </button>

@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <img
                 src="https://res.cloudinary.com/dy6km7beb/image/upload/v1789980615/Untitled_design_11_ocowpa.png"
-                alt="SQFT DXB - Real Estate"
+                alt="SQFT DXB"
                 className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 referrerPolicy="no-referrer"
               />

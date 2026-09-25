@@ -14,6 +14,7 @@ export interface Agent {
   photo: string;
   reraNumber: string;
   verifiedDeals: number;
+  propertyCount?: number;
 }
 
 export interface Property {

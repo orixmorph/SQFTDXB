@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { SellRentCtaBanner } from './components/SellRentCtaBanner';
@@ -16,20 +16,30 @@ import { PropertyDetailModal } from './components/PropertyDetailModal';
 import { ListPropertyModal } from './components/ListPropertyModal';
 import { SavedPropertiesModal } from './components/SavedPropertiesModal';
 import { Footer } from './components/Footer';
-import { Property, SearchFilterState, PropertyPurpose } from './types';
-import { properties } from './data/mockData';
+import { Property, SearchFilterState, PropertyPurpose, Area, Agent } from './types';
+import { properties as fallbackProperties, areas as fallbackAreas, agents as fallbackAgents } from './data/mockData';
 import { BlogPost } from './data/blogData';
+import {
+  fetchLiveProperties,
+  fetchPropertyById,
+  fetchLiveAgents,
+  fetchLiveAreas,
+  computeDynamicAreas,
+} from './services/propertyService';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<string>('home');
+  const [propertiesList, setPropertiesList] = useState<Property[]>([]);
+  const [areasList, setAreasList] = useState<Area[]>(fallbackAreas);
+  const [agentsList, setAgentsList] = useState<Agent[]>(fallbackAgents);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
   const [savedPropertyIds, setSavedPropertyIds] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem('sqft_dxb_saved');
-      return stored ? JSON.parse(stored) : ['prop-1', 'prop-3'];
+      return stored ? JSON.parse(stored) : [];
     } catch {
-      return ['prop-1', 'prop-3'];
+      return [];
     }
   });
 
@@ -41,6 +51,77 @@ export default function App() {
   const [listPropertyPurpose, setListPropertyPurpose] = useState<PropertyPurpose>('buy');
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
 
+  // Dynamically computed areas based on database properties & fetched communities
+  const dynamicAreas = useMemo(() => {
+    return computeDynamicAreas(propertiesList, areasList);
+  }, [propertiesList, areasList]);
+
+  // Fetch LIVE properties, areas, and agents from Baserow on initial mount
+  useEffect(() => {
+    let isMounted = true;
+
+    // 1. Fetch live properties
+    fetchLiveProperties()
+      .then((res) => {
+        if (isMounted && res.properties && res.properties.length > 0) {
+          setPropertiesList(res.properties);
+        }
+      })
+      .catch((err) => {
+        console.warn('[App] Could not fetch live Baserow properties:', err);
+      });
+
+    // 2. Fetch live agents with exact database property counts
+    fetchLiveAgents()
+      .then((data) => {
+        if (isMounted && data && data.length > 0) {
+          setAgentsList(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('[App] Could not fetch live agents:', err);
+      });
+
+    // 3. Fetch live areas
+    fetchLiveAreas()
+      .then((data) => {
+        if (isMounted && data && data.length > 0) {
+          setAreasList(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('[App] Could not fetch live areas:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Support direct deep link to property by URL hash or search param
+  useEffect(() => {
+    const handleUrlCheck = () => {
+      const hash = window.location.hash.replace('#', '');
+      const params = new URLSearchParams(window.location.search);
+      const propId = params.get('property') || (hash.startsWith('property-') ? hash.replace('property-', '') : null);
+
+      if (propId) {
+        const found = propertiesList.find((p) => p.id === propId || p.slug === propId);
+        if (found) {
+          setSelectedProperty(found);
+        } else {
+          fetchPropertyById(propId).then((p) => {
+            if (p) setSelectedProperty(p);
+          });
+        }
+      }
+    };
+
+    handleUrlCheck();
+    window.addEventListener('hashchange', handleUrlCheck);
+    return () => window.removeEventListener('hashchange', handleUrlCheck);
+  }, [propertiesList]);
+
   useEffect(() => {
     try {
       localStorage.setItem('sqft_dxb_saved', JSON.stringify(savedPropertyIds));
@@ -48,6 +129,18 @@ export default function App() {
       // Ignore storage errors
     }
   }, [savedPropertyIds]);
+
+  const handleSelectProperty = (prop: Property) => {
+    setSelectedProperty(prop);
+    // Asynchronously retrieve full property record if updated
+    if (prop.id) {
+      fetchPropertyById(prop.id).then((fullProp) => {
+        if (fullProp) {
+          setSelectedProperty(fullProp);
+        }
+      });
+    }
+  };
 
   // Scroll to top on view change
   const navigateTo = (view: string, filter?: { purpose?: PropertyPurpose; areaId?: string }) => {
@@ -86,6 +179,17 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleAgentNavigateToProperties = (agentName?: string) => {
+    if (agentName) {
+      setSearchFilters({
+        purpose: 'buy',
+        searchQuery: agentName,
+      });
+    }
+    setCurrentView('properties');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleToggleSaveProperty = (propertyId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setSavedPropertyIds((prev) =>
@@ -100,7 +204,7 @@ export default function App() {
     setIsListPropertyOpen(true);
   };
 
-  const savedPropertiesList = properties.filter((p) =>
+  const savedPropertiesList = propertiesList.filter((p) =>
     savedPropertyIds.includes(p.id)
   );
 
@@ -124,6 +228,7 @@ export default function App() {
               onSearch={handleHeroSearch}
               onSelectArea={handleSelectArea}
               onOpenListProperty={handleOpenListProperty}
+              areas={dynamicAreas}
             />
 
             {/* SECTION 02 — SELL OR RENT YOUR PROPERTY CTA BANNER */}
@@ -135,11 +240,13 @@ export default function App() {
             <TrendingAreas
               onSelectArea={handleSelectArea}
               onViewAllAreas={() => navigateTo('areas')}
+              areas={dynamicAreas}
             />
 
             {/* SECTION 04 — HOT LISTINGS OF THE WEEK CAROUSEL */}
             <NewSecondaryProjects
-              onSelectProperty={(prop) => setSelectedProperty(prop)}
+              properties={propertiesList}
+              onSelectProperty={handleSelectProperty}
               onViewAllProperties={() => navigateTo('properties')}
             />
 
@@ -154,11 +261,12 @@ export default function App() {
         {/* PROPERTIES VIEW */}
         {currentView === 'properties' && (
           <PropertiesPage
-            properties={properties}
-            onSelectProperty={(prop) => setSelectedProperty(prop)}
+            properties={propertiesList}
+            onSelectProperty={handleSelectProperty}
             savedPropertyIds={savedPropertyIds}
             onToggleSaveProperty={handleToggleSaveProperty}
             initialFilters={searchFilters}
+            areas={dynamicAreas}
           />
         )}
 
@@ -166,6 +274,7 @@ export default function App() {
         {currentView === 'areas' && (
           <AreasPage
             onSelectArea={handleSelectArea}
+            areas={dynamicAreas}
           />
         )}
 
@@ -181,8 +290,9 @@ export default function App() {
         {/* ABOUT VIEW */}
         {currentView === 'about' && (
           <AboutView
-            onNavigateToProperties={() => navigateTo('properties')}
+            onNavigateToProperties={handleAgentNavigateToProperties}
             onOpenListProperty={() => handleOpenListProperty('buy')}
+            agents={agentsList}
           />
         )}
 
@@ -223,7 +333,7 @@ export default function App() {
         isOpen={isSavedModalOpen}
         onClose={() => setIsSavedModalOpen(false)}
         savedProperties={savedPropertiesList}
-        onSelectProperty={(prop) => setSelectedProperty(prop)}
+        onSelectProperty={handleSelectProperty}
         onRemoveSaved={(id) => setSavedPropertyIds((prev) => prev.filter((item) => item !== id))}
       />
 

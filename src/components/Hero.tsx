@@ -12,8 +12,8 @@ import {
   Sparkles,
   TrendingUp,
 } from 'lucide-react';
-import { PropertyPurpose, SearchFilterState } from '../types';
-import { areas } from '../data/mockData';
+import { PropertyPurpose, SearchFilterState, Area } from '../types';
+import { areas as defaultAreas } from '../data/mockData';
 
 // Replace this Cloudinary URL with your desired 1st section background image link
 export const HERO_SECTION_BG_IMAGE =
@@ -24,6 +24,7 @@ interface HeroProps {
   onSelectArea: (areaId: string) => void;
   onOpenListProperty?: (purpose: PropertyPurpose) => void;
   backgroundImageUrl?: string;
+  areas?: Area[];
 }
 
 export const Hero: React.FC<HeroProps> = ({
@@ -31,6 +32,7 @@ export const Hero: React.FC<HeroProps> = ({
   onSelectArea,
   onOpenListProperty,
   backgroundImageUrl,
+  areas = defaultAreas,
 }) => {
   const [purpose, setPurpose] = useState<PropertyPurpose>('buy');
   const [selectedArea, setSelectedArea] = useState<string>('');
@@ -103,10 +105,10 @@ export const Hero: React.FC<HeroProps> = ({
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Tag */}
-        <div className="flex justify-center mb-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#EAEAEA] text-xs font-semibold text-[#171717] shadow-sm">
+        <div className="flex justify-center mb-3.5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-[#EAEAEA] text-xs font-semibold text-[#171717] shadow-sm">
             <span className="w-2 h-2 rounded-full bg-[#CF9F5D]"></span>
-            <span>Secondary & Ready-to-Move Specialist</span>
+            <span className="font-bold">SQFT DXB</span>
             <span className="text-[#8A8A8A] font-normal">•</span>
             <span className="text-[#6F6F6F] font-normal">
               Powered by{' '}
@@ -123,25 +125,25 @@ export const Hero: React.FC<HeroProps> = ({
         </div>
 
         {/* Hero Headline & Subtitle */}
-        <div className="text-center max-w-3xl mx-auto mb-7">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#171717] tracking-tight leading-[1.15] mb-3">
-            Real Properties. Real Details. <span className="text-[#CF9F5D]">Dubai.</span>
+        <div className="text-center max-w-3xl mx-auto mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#171717] tracking-tight leading-[1.15] mb-2.5 uppercase">
+            WE FIND, YOU MOVE IN
           </h1>
           <p className="text-sm sm:text-base text-[#4A4A4A] font-medium leading-relaxed max-w-2xl mx-auto">
-            Discover verified secondary-market residences and ready homes across Dubai’s most desirable communities. Actual photos, confirmed availability, and immediate key handover.
+            Discover verified secondary market residences, commercial spaces, and ready properties across Dubai’s most desirable communities. Actual photos, confirmed availability, and immediate handover.
           </p>
         </div>
 
-        {/* Streamlined Hero Search Box Card */}
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 shadow-[0_12px_32px_rgba(0,0,0,0.07)] border border-[#EAEAEA]">
+        {/* Streamlined Hero Search Box Card (Slightly Reduced Height) */}
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 md:p-5 shadow-[0_12px_32px_rgba(0,0,0,0.07)] border border-[#EAEAEA]">
           {/* Top Tabs Row */}
-          <div className="flex items-center justify-between border-b border-[#F0F0EE] pb-2.5 mb-3.5">
-            <div className="flex items-center gap-1.5 bg-[#F7F7F5] p-1 sm:p-1.5 rounded-xl border border-[#EAEAEA]">
+          <div className="flex items-center justify-between border-b border-[#F0F0EE] pb-2 mb-2.5">
+            <div className="flex items-center gap-1 bg-[#F7F7F5] p-1 rounded-xl border border-[#EAEAEA]">
               <button
                 type="button"
                 id="hero-tab-buy"
                 onClick={() => setPurpose('buy')}
-                className={`px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
+                className={`px-4 sm:px-5 py-1 sm:py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                   purpose === 'buy'
                     ? 'bg-white text-[#171717] shadow-sm'
                     : 'text-[#6F6F6F] hover:text-[#171717]'
@@ -153,7 +155,7 @@ export const Hero: React.FC<HeroProps> = ({
                 type="button"
                 id="hero-tab-rent"
                 onClick={() => setPurpose('rent')}
-                className={`px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
+                className={`px-4 sm:px-5 py-1 sm:py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                   purpose === 'rent'
                     ? 'bg-white text-[#171717] shadow-sm'
                     : 'text-[#6F6F6F] hover:text-[#171717]'
@@ -162,12 +164,15 @@ export const Hero: React.FC<HeroProps> = ({
                 Rent
               </button>
             </div>
+            <span className="hidden sm:inline-block text-[11px] font-medium text-[#8A8A8A]">
+              Residential & Commercial Secondary Market
+            </span>
           </div>
 
           {/* Search and Filters Form */}
-          <form onSubmit={handleSearchSubmit} className="space-y-3">
+          <form onSubmit={handleSearchSubmit} className="space-y-2.5">
             {/* Unified Search Input + Submit Button Row */}
-            <div className="flex flex-col sm:flex-row gap-2.5">
+            <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                   <Search className="h-4 w-4 text-[#8A8A8A]" />
@@ -177,15 +182,15 @@ export const Hero: React.FC<HeroProps> = ({
                   id="hero-search-query-input"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search building, project, or area (e.g. Marina Gate, Downtown, Palm Villa)..."
-                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-[#F9F9F8] border border-[#EAEAEA] rounded-xl text-xs sm:text-sm text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#CF9F5D]/30 focus:border-[#CF9F5D] transition-all"
+                  placeholder="Search residential or commercial (e.g. Marina Gate, Downtown, Business Bay, DIFC)..."
+                  className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-[#F9F9F8] border border-[#EAEAEA] rounded-xl text-xs sm:text-sm text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:ring-2 focus:ring-[#CF9F5D]/30 focus:border-[#CF9F5D] transition-all"
                 />
               </div>
 
               <button
                 type="submit"
                 id="hero-submit-search-btn"
-                className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] active:bg-[#000000] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow cursor-pointer flex-shrink-0"
+                className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] active:bg-[#000000] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow cursor-pointer flex-shrink-0"
               >
                 <Search className="w-4 h-4 text-[#CF9F5D]" />
                 <span>Search</span>
@@ -193,14 +198,14 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
 
             {/* Filters Grid Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {/* Location */}
               <div className="relative">
                 <select
                   id="hero-area-select"
                   value={selectedArea}
                   onChange={(e) => setSelectedArea(e.target.value)}
-                  className="w-full pl-3 pr-8 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer truncate shadow-2xs"
+                  className="w-full pl-3 pr-8 py-2 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer truncate shadow-2xs"
                   title="Location / Area"
                 >
                   <option value="">All Dubai Areas</option>
@@ -210,7 +215,7 @@ export const Hero: React.FC<HeroProps> = ({
                     </option>
                   ))}
                 </select>
-                <MapPin className="w-3.5 h-3.5 text-[#8A8A8A] absolute right-3 top-3.5 pointer-events-none" />
+                <MapPin className="w-3.5 h-3.5 text-[#8A8A8A] absolute right-3 top-2.5 pointer-events-none" />
               </div>
 
               {/* Property Type */}
@@ -219,7 +224,7 @@ export const Hero: React.FC<HeroProps> = ({
                   id="hero-type-select"
                   value={propertyType}
                   onChange={(e) => setPropertyType(e.target.value)}
-                  className="w-full pl-3 pr-8 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer shadow-2xs"
+                  className="w-full pl-3 pr-8 py-2 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] appearance-none cursor-pointer shadow-2xs"
                   title="Property Type"
                 >
                   <option value="">All Types</option>
@@ -228,8 +233,9 @@ export const Hero: React.FC<HeroProps> = ({
                   <option value="Villa">Villa</option>
                   <option value="Townhouse">Townhouse</option>
                   <option value="Duplex">Duplex</option>
+                  <option value="Commercial">Commercial / Office</option>
                 </select>
-                <Home className="w-3.5 h-3.5 text-[#8A8A8A] absolute right-3 top-3.5 pointer-events-none" />
+                <Home className="w-3.5 h-3.5 text-[#8A8A8A] absolute right-3 top-2.5 pointer-events-none" />
               </div>
 
               {/* Bedrooms */}
@@ -238,7 +244,7 @@ export const Hero: React.FC<HeroProps> = ({
                   id="hero-beds-select"
                   value={bedrooms}
                   onChange={(e) => setBedrooms(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer shadow-2xs"
+                  className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer shadow-2xs"
                   title="Bedrooms"
                 >
                   <option value="">Any Beds</option>
@@ -256,7 +262,7 @@ export const Hero: React.FC<HeroProps> = ({
                   id="hero-price-select"
                   value={priceRange}
                   onChange={(e) => setPriceRange(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer truncate shadow-2xs"
+                  className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-xs sm:text-sm font-semibold text-[#171717] focus:outline-none focus:ring-1 focus:ring-[#CF9F5D] cursor-pointer truncate shadow-2xs"
                   title="Price Range"
                 >
                   <option value="">Any Budget</option>
@@ -279,7 +285,7 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
 
             {/* Quick Popular Pills */}
-            <div className="pt-1.5 flex items-center justify-between gap-2 text-xs text-[#6F6F6F] overflow-x-auto pb-0.5">
+            <div className="pt-1 flex items-center justify-between gap-2 text-xs text-[#6F6F6F] overflow-x-auto pb-0.5">
               <div className="flex items-center gap-2 flex-nowrap">
                 <Sparkles className="w-3.5 h-3.5 text-[#CF9F5D] flex-shrink-0" />
                 <span className="text-[#8A8A8A] flex-shrink-0 font-medium">Popular:</span>
@@ -303,6 +309,13 @@ export const Hero: React.FC<HeroProps> = ({
                   className="px-2.5 py-1 rounded-lg bg-[#F7F7F5] hover:bg-[#EAEAEA] text-[#171717] whitespace-nowrap cursor-pointer transition-colors font-medium"
                 >
                   Palm Penthouses
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickPill('Business Bay Office', 'business-bay', 'Commercial')}
+                  className="px-2.5 py-1 rounded-lg bg-[#F7F7F5] hover:bg-[#EAEAEA] text-[#171717] whitespace-nowrap cursor-pointer transition-colors font-medium"
+                >
+                  Commercial Spaces
                 </button>
               </div>
             </div>

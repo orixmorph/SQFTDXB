@@ -11,32 +11,37 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Property } from '../types';
-import { properties } from '../data/mockData';
+import { properties as fallbackProperties } from '../data/mockData';
 
 interface NewSecondaryProjectsProps {
+  properties?: Property[];
   onSelectProperty: (property: Property) => void;
   onViewAllProperties: () => void;
 }
 
 export const NewSecondaryProjects: React.FC<NewSecondaryProjectsProps> = ({
+  properties: passedProperties,
   onSelectProperty,
   onViewAllProperties,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeFilter, setActiveFilter] = useState<string>('all');
 
+  const availableProperties = passedProperties && passedProperties.length > 0 ? passedProperties : fallbackProperties;
+
+  // Extract dynamic communities available in loaded properties
+  const dynamicAreas = Array.from(
+    new Set(availableProperties.map((p) => p.area).filter(Boolean) as string[])
+  ).slice(0, 6);
+
   const filterTabs = [
     { id: 'all', label: 'All Ready' },
-    { id: 'dubai-marina', label: 'Dubai Marina' },
-    { id: 'palm-jumeirah', label: 'Palm Jumeirah' },
-    { id: 'downtown-dubai', label: 'Downtown Dubai' },
-    { id: 'dubai-hills-estate', label: 'Dubai Hills' },
-    { id: 'business-bay', label: 'Business Bay' },
+    ...dynamicAreas.map((a) => ({ id: a, label: a })),
   ];
 
-  const filteredProperties = properties.filter((p) => {
+  const filteredProperties = availableProperties.filter((p) => {
     if (activeFilter === 'all') return true;
-    return p.areaId === activeFilter;
+    return p.area === activeFilter || p.areaId === activeFilter;
   });
 
   const scroll = (direction: 'left' | 'right') => {
@@ -119,10 +124,14 @@ export const NewSecondaryProjects: React.FC<NewSecondaryProjectsProps> = ({
                 {/* Image */}
                 <div className="relative aspect-[16/11] w-full overflow-hidden bg-[#F7F7F5]">
                   <img
-                    src={property.images[0]}
+                    src={property.images?.[0] || 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85'}
                     alt={property.projectName}
                     referrerPolicy="no-referrer"
                     loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85';
+                    }}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute top-3 left-3 flex items-center gap-1.5">

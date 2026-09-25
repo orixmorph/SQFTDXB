@@ -54,9 +54,9 @@ export const ContactView: React.FC = () => {
                   <strong className="block text-[#171717]">SQFT DXB Real Estate</strong>
                   <span className="text-xs text-[#6F6F6F]">Powered by Jamoka Properties • RERA ORN: 49679</span>
                   <div className="mt-1">
-                    <span>Level 28, Boulevard Plaza Tower 1</span>
+                    <span>Bayswater Tower, 8th floor and 11th floor</span>
                     <br />
-                    <span>Downtown Dubai, United Arab Emirates</span>
+                    <span>Business Bay, Dubai, United Arab Emirates</span>
                   </div>
                 </div>
               </div>
@@ -80,8 +80,8 @@ export const ContactView: React.FC = () => {
               <div className="flex items-center gap-3.5 text-sm text-[#4A4A4A]">
                 <Clock className="w-5 h-5 text-[#CF9F5D] flex-shrink-0" />
                 <div>
-                  <strong className="block text-[#171717]">Private Viewing Hours</strong>
-                  <span>Monday - Saturday: 9:00 AM – 7:30 PM (GST)</span>
+                  <strong className="block text-[#171717]">Office Hours</strong>
+                  <span>10:00 a.m. to 5:00 p.m.</span>
                 </div>
               </div>
             </div>
@@ -115,7 +115,7 @@ export const ContactView: React.FC = () => {
                   Thank You for Reaching Out
                 </h3>
                 <p className="text-sm text-[#6F6F6F] max-w-md mx-auto">
-                  We have received your message. A licensed secondary advisor will respond within 2 hours during active viewing times.
+                  We have received your message. A licensed secondary advisor will respond within 2 hours during office hours.
                 </p>
                 <button
                   onClick={() => setSubmitted(false)}

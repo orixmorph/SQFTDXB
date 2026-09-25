@@ -9,9 +9,9 @@ import {
   CheckCircle2,
   X,
 } from 'lucide-react';
-import { Property, SearchFilterState, PropertyPurpose } from '../types';
+import { Property, SearchFilterState, PropertyPurpose, Area } from '../types';
 import { PropertyCard } from './PropertyCard';
-import { areas } from '../data/mockData';
+import { areas as defaultAreas } from '../data/mockData';
 
 interface PropertiesPageProps {
   properties: Property[];
@@ -19,6 +19,7 @@ interface PropertiesPageProps {
   savedPropertyIds: string[];
   onToggleSaveProperty: (propertyId: string, e: React.MouseEvent) => void;
   initialFilters?: Partial<SearchFilterState>;
+  areas?: Area[];
 }
 
 export const PropertiesPage: React.FC<PropertiesPageProps> = ({
@@ -27,6 +28,7 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
   savedPropertyIds,
   onToggleSaveProperty,
   initialFilters,
+  areas = defaultAreas,
 }) => {
   const [purpose, setPurpose] = useState<PropertyPurpose>(
     initialFilters?.purpose || 'buy'
@@ -75,7 +77,23 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
         if (item.purpose !== purpose) return false;
 
         // Area filter
-        if (selectedArea && item.areaId !== selectedArea) return false;
+        if (selectedArea) {
+          const sel = selectedArea.toLowerCase().trim();
+          const pAreaId = (item.areaId || '').toLowerCase().trim();
+          const pArea = (item.area || '').toLowerCase().trim();
+          const matches =
+            pAreaId === sel ||
+            pArea === sel ||
+            pAreaId.includes(sel) ||
+            sel.includes(pAreaId) ||
+            pArea.includes(sel) ||
+            sel.includes(pArea) ||
+            ((sel === 'difc' || sel.includes('difc')) && (pArea.includes('difc') || pArea.includes('financial'))) ||
+            (sel.includes('sheba') && pArea.includes('sheba')) ||
+            (sel.includes('arabian-ranches') && pArea.includes('arabian ranches')) ||
+            (sel.includes('mbr') && (pArea.includes('mbr') || pArea.includes('mohammed bin rashid')));
+          if (!matches) return false;
+        }
 
         // Property type filter
         if (propertyType && item.propertyType !== propertyType) return false;

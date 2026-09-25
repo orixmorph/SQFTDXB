@@ -24,10 +24,14 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       {/* Property Image Container */}
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#F7F7F5]">
         <img
-          src={property.images[0]}
-          alt={property.title}
+          src={property.images?.[0] || 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85'}
+          alt={property.title || 'Dubai Property'}
           referrerPolicy="no-referrer"
           loading="lazy"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src =
+              'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85';
+          }}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
 

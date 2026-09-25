@@ -10,11 +10,12 @@ import {
   Compass,
 } from 'lucide-react';
 import { Area } from '../types';
-import { areas } from '../data/mockData';
+import { areas as defaultAreas } from '../data/mockData';
 
 interface TrendingAreasProps {
   onSelectArea: (areaId: string) => void;
   onViewAllAreas: () => void;
+  areas?: Area[];
 }
 
 type AreaCategory = 'all' | 'waterfront' | 'urban' | 'estates';
@@ -22,6 +23,7 @@ type AreaCategory = 'all' | 'waterfront' | 'urban' | 'estates';
 export const TrendingAreas: React.FC<TrendingAreasProps> = ({
   onSelectArea,
   onViewAllAreas,
+  areas = defaultAreas,
 }) => {
   const [activeCategory, setActiveCategory] = useState<AreaCategory>('all');
 
@@ -34,14 +36,15 @@ export const TrendingAreas: React.FC<TrendingAreasProps> = ({
 
   // Tag areas by category
   const filteredAreas = areas.filter((area) => {
+    const id = area.id.toLowerCase();
     if (activeCategory === 'waterfront') {
-      return ['dubai-marina', 'palm-jumeirah', 'jbr', 'jumeirah'].includes(area.id);
+      return ['dubai-marina', 'palm-jumeirah', 'jbr', 'jumeirah', 'tilal-al-ghaf'].some((k) => id.includes(k));
     }
     if (activeCategory === 'urban') {
-      return ['downtown-dubai', 'business-bay', 'difc'].includes(area.id);
+      return ['downtown', 'business-bay', 'difc', 'mohammed-bin-rashid', 'district-11'].some((k) => id.includes(k));
     }
     if (activeCategory === 'estates') {
-      return ['dubai-hills-estate', 'arabian-ranches', 'emirates-hills'].includes(area.id);
+      return ['dubai-hills', 'arabian-ranches', 'sheba', 'emirates-hills'].some((k) => id.includes(k));
     }
     return true;
   }).slice(0, 8);
@@ -133,21 +136,8 @@ export const TrendingAreas: React.FC<TrendingAreasProps> = ({
                 {/* Ambient Cinematic Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent pointer-events-none" />
 
-                {/* Glowing Top Badges */}
-                <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-[11px] font-mono font-medium text-white shadow-sm flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#CF9F5D] animate-pulse"></span>
-                      <span>{area.readyCount} Ready Units</span>
-                    </span>
-
-                    {area.avgPriceSqft && (
-                      <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[11px] font-mono text-[#E0E0E0]">
-                        AED {area.avgPriceSqft}/sqft
-                      </span>
-                    )}
-                  </div>
-
+                {/* Top Corner Action Indicator */}
+                <div className="absolute top-4 right-4 pointer-events-none">
                   <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white group-hover:bg-[#CF9F5D] group-hover:border-[#CF9F5D] group-hover:text-white transition-all shadow-md group-hover:rotate-12">
                     <ArrowUpRight className="w-4 h-4" />
                   </div>
@@ -172,23 +162,9 @@ export const TrendingAreas: React.FC<TrendingAreasProps> = ({
                     {area.name}
                   </h3>
 
-                  <p className="text-xs text-white/80 line-clamp-1 mt-1 font-light leading-relaxed">
+                  <p className="text-xs text-white/80 line-clamp-2 mt-1 font-light leading-relaxed">
                     {area.description}
                   </p>
-
-                  {/* Micro Metric Pill Bar on Larger Cards */}
-                  {isFeaturedLarge && area.popularTypes && (
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                      {area.popularTypes.map((type, tIdx) => (
-                        <span
-                          key={tIdx}
-                          className="px-2 py-0.5 rounded-md bg-white/15 backdrop-blur-sm text-[10px] font-medium text-white/90"
-                        >
-                          {type}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </motion.div>
             );
