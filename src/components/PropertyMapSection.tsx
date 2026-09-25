@@ -19,14 +19,14 @@ export const PropertyMapSection: React.FC<PropertyMapSectionProps> = ({ property
   const [zoomLevel, setZoomLevel] = useState(15);
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
 
-  // Helper to parse coordinate from number or string (from Baserow or other APIs)
+  // Helper to parse coordinate from number or string
   const parseCoord = (val: unknown): number | null => {
     if (val === null || val === undefined || val === '') return null;
     const parsed = typeof val === 'number' ? val : parseFloat(String(val).trim());
     return isNaN(parsed) ? null : parsed;
   };
 
-  // Strictly resolve coordinates from database; do not invent coordinates if missing
+  // Strictly resolve coordinates from database
   const lat =
     parseCoord(property.latitude) ??
     parseCoord(property.Latitude) ??
@@ -43,7 +43,7 @@ export const PropertyMapSection: React.FC<PropertyMapSectionProps> = ({ property
 
   const formattedCoordinates = hasCoordinates
     ? `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`
-    : 'Pending Database Entry';
+    : null;
 
   const handleCopyCoordinates = () => {
     if (!hasCoordinates) return;
@@ -64,117 +64,121 @@ export const PropertyMapSection: React.FC<PropertyMapSectionProps> = ({ property
         `${property.projectName || property.buildingName || ''} ${property.area} Dubai`
       )}`;
 
-  // Embedded map URL with dynamic coordinates from Baserow
+  // Embedded map URL with dynamic coordinates
   const mapEmbedUrl = hasCoordinates
     ? `https://maps.google.com/maps?q=${lat},${lng}&t=${
         mapType === 'satellite' ? 'k' : 'm'
       }&z=${zoomLevel}&hl=en&output=embed`
     : null;
 
-  const propertyThumbnail = property.images && property.images.length > 0 ? property.images[0] : null;
-
   return (
-    <div className="rounded-2xl border border-[#EAEAEA] bg-white p-5 sm:p-6 space-y-5 shadow-xs">
-      {/* Header with Title, Coordinates, and Action Buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#F0F0EE]">
+    <div className="rounded-2xl border border-stone-200/90 bg-[#FAFAF9] p-4 sm:p-5 space-y-3.5 shadow-2xs">
+      {/* Sleek, Minimal Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-stone-200/70">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#F7F5F0] text-[#CF9F5D] flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-[#CF9F5D]" />
-            </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-bold text-[#171717]">
-                Location & Map Pin
-              </h3>
-              <p className="text-xs text-[#6F6F6F]">
-                {property.projectName ? `${property.projectName}, ` : ''}
-                {property.area}, Dubai, UAE
-              </p>
-            </div>
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#A67C3D] uppercase tracking-wider mb-0.5">
+            <MapPin className="w-3.5 h-3.5 text-[#CF9F5D]" />
+            <span>Location & Neighborhood</span>
           </div>
+          <p className="text-sm font-semibold text-stone-900">
+            {property.projectName ? `${property.projectName}, ` : ''}
+            {property.area}, Dubai
+          </p>
         </div>
 
-        {/* GPS Coordinates Badge & Copy Button */}
-        {hasCoordinates ? (
-          <div className="flex items-center gap-2 self-start sm:self-auto">
-            <div className="px-3 py-1.5 rounded-lg bg-[#F7F7F5] border border-[#EAEAEA] text-xs font-mono font-semibold text-[#171717] flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-[#CF9F5D]" />
-              <span>{formattedCoordinates}</span>
+        {/* Compact Right-Side Actions */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {hasCoordinates && formattedCoordinates ? (
+            <div className="flex items-center gap-1 bg-white border border-stone-200/80 rounded-lg px-2.5 py-1 shadow-2xs">
+              <Compass className="w-3 h-3 text-[#CF9F5D]" />
+              <span className="text-[11px] font-mono text-stone-600">
+                {formattedCoordinates}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyCoordinates}
+                title="Copy coordinates"
+                className="ml-1 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer p-0.5"
+              >
+                {copied ? (
+                  <Check className="w-3 h-3 text-emerald-600" />
+                ) : (
+                  <Copy className="w-3 h-3" />
+                )}
+              </button>
             </div>
+          ) : (
+            <div className="inline-flex items-center gap-1 text-[11px] text-stone-500">
+              <AlertCircle className="w-3 h-3 text-[#CF9F5D]" />
+              <span>Location: {property.area}</span>
+            </div>
+          )}
 
-            <button
-              type="button"
-              onClick={handleCopyCoordinates}
-              title="Copy Latitude & Longitude"
-              className="p-1.5 rounded-lg border border-[#EAEAEA] bg-white hover:bg-[#F7F7F5] text-[#171717] transition-all cursor-pointer"
-            >
-              {copied ? (
-                <Check className="w-4 h-4 text-emerald-600" />
-              ) : (
-                <Copy className="w-4 h-4 text-[#707070]" />
-              )}
-            </button>
-          </div>
-        ) : (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FDF8F0] border border-[#CF9F5D]/30 text-xs font-medium text-[#A67C3D]">
-            <AlertCircle className="w-3.5 h-3.5 text-[#CF9F5D]" />
-            <span>Coordinates pending in Baserow</span>
-          </div>
-        )}
+          <a
+            href={googleMapsSearchUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-stone-50 border border-stone-200/80 text-stone-700 hover:text-[#171717] text-[11px] font-medium transition-colors shadow-2xs"
+            title="Open in Google Maps"
+          >
+            <span>Google Maps</span>
+            <ExternalLink className="w-3 h-3 text-stone-400" />
+          </a>
+        </div>
       </div>
 
-      {/* Map Display Container */}
+      {/* Classy, Compact Map Canvas (h-64 sm:h-72) */}
       {hasCoordinates && mapEmbedUrl ? (
-        <div className="relative rounded-xl overflow-hidden border border-[#E2E2DC] bg-[#F2F2EC] shadow-inner">
-          {/* Floating Controls Bar over Map */}
-          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-[#E2E2DC] shadow-sm">
+        <div className="relative rounded-xl overflow-hidden border border-stone-200/80 bg-stone-100 shadow-inner">
+          {/* Subtle Map / Satellite Toggle */}
+          <div className="absolute top-2.5 left-2.5 z-10 flex items-center bg-white/90 backdrop-blur-xs p-0.5 rounded-lg border border-stone-200/70 shadow-2xs">
             <button
               type="button"
               onClick={() => setMapType('roadmap')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+              className={`px-2 py-0.5 text-[11px] font-medium rounded-md transition-colors cursor-pointer ${
                 mapType === 'roadmap'
-                  ? 'bg-[#171717] text-white'
-                  : 'text-[#6F6F6F] hover:text-[#171717]'
+                  ? 'bg-stone-900 text-white shadow-2xs'
+                  : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              Map View
+              Map
             </button>
             <button
               type="button"
               onClick={() => setMapType('satellite')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+              className={`px-2 py-0.5 text-[11px] font-medium rounded-md transition-colors cursor-pointer ${
                 mapType === 'satellite'
-                  ? 'bg-[#171717] text-white'
-                  : 'text-[#6F6F6F] hover:text-[#171717]'
+                  ? 'bg-stone-900 text-white shadow-2xs'
+                  : 'text-stone-600 hover:text-stone-900'
               }`}
             >
               Satellite
             </button>
           </div>
 
-          {/* Zoom Controls */}
-          <div className="absolute top-3 right-3 z-10 flex flex-col items-center bg-white/95 backdrop-blur-md rounded-xl border border-[#E2E2DC] shadow-sm overflow-hidden">
+          {/* Minimal Zoom Controls */}
+          <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-center bg-white/90 backdrop-blur-xs rounded-lg border border-stone-200/70 shadow-2xs overflow-hidden">
             <button
               type="button"
               onClick={() => setZoomLevel((z) => Math.min(z + 1, 19))}
               title="Zoom In"
-              className="px-2.5 py-1 text-sm font-bold text-[#171717] hover:bg-[#F7F7F5] cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center text-xs font-bold text-stone-700 hover:bg-stone-100 cursor-pointer"
             >
               +
             </button>
-            <div className="w-full h-px bg-[#EAEAEA]" />
+            <div className="w-full h-px bg-stone-200/70" />
             <button
               type="button"
               onClick={() => setZoomLevel((z) => Math.max(z - 1, 11))}
               title="Zoom Out"
-              className="px-2.5 py-1 text-sm font-bold text-[#171717] hover:bg-[#F7F7F5] cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center text-xs font-bold text-stone-700 hover:bg-stone-100 cursor-pointer"
             >
               −
             </button>
           </div>
 
-          {/* Embedded Map Frame */}
-          <div className="relative w-full h-80 sm:h-96">
+          {/* Proportional, Elegant Height (h-64 sm:h-72) */}
+          <div className="relative w-full h-64 sm:h-72">
             <iframe
               title={`Map location of ${property.title}`}
               src={mapEmbedUrl}
@@ -183,90 +187,68 @@ export const PropertyMapSection: React.FC<PropertyMapSectionProps> = ({ property
               referrerPolicy="no-referrer-when-downgrade"
             />
 
-            {/* Floating Property Pin & Portrait Card on Bottom Left */}
-            <div className="absolute bottom-3 left-3 right-3 sm:right-auto z-10 max-w-md bg-white/95 backdrop-blur-md p-3 rounded-xl border border-[#E0E0D8] shadow-md pointer-events-auto">
-              <div className="flex items-center gap-3">
-                {propertyThumbnail && (
-                  <img
-                    src={propertyThumbnail}
-                    alt={property.title}
-                    referrerPolicy="no-referrer"
-                    className="w-14 h-14 rounded-lg object-cover border border-[#EAEAEA] flex-shrink-0"
-                  />
-                )}
-
-                <div className="min-w-0 flex-1">
-                  <div className="inline-flex items-center gap-1 text-[11px] font-bold text-[#A67C3D] uppercase tracking-wider mb-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#CF9F5D] animate-pulse" />
-                    <span>Baserow GPS Pin</span>
-                  </div>
-                  <h4 className="text-xs sm:text-sm font-extrabold text-[#171717] truncate">
-                    {property.projectName || property.title}
-                  </h4>
-                  <p className="text-[11px] text-[#606060] truncate">
-                    {property.area} • {property.priceDisplay}
-                  </p>
-                </div>
-
-                <a
-                  href={googleMapsDirectionsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#171717] text-white text-[11px] font-bold hover:bg-[#2A2A2A] transition-colors cursor-pointer"
-                >
-                  <Navigation className="w-3 h-3 text-[#CF9F5D]" />
-                  <span>Directions</span>
-                </a>
-              </div>
+            {/* Non-intrusive Floating Chip on Bottom-Left */}
+            <div className="absolute bottom-2.5 left-2.5 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-stone-200/80 shadow-2xs text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#CF9F5D] flex-shrink-0" />
+              <span className="font-semibold text-stone-900 truncate max-w-[150px] sm:max-w-[220px]">
+                {property.projectName || property.title}
+              </span>
+              <span className="text-stone-300">|</span>
+              <a
+                href={googleMapsDirectionsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 font-semibold text-[#A67C3D] hover:text-stone-900 transition-colors"
+                title="Get driving directions"
+              >
+                <Navigation className="w-3 h-3 text-[#CF9F5D]" />
+                <span>Directions</span>
+              </a>
             </div>
           </div>
         </div>
       ) : (
-        <div className="p-8 rounded-xl border border-dashed border-[#E0E0D8] bg-[#FBFBF9] text-center space-y-3">
-          <div className="w-10 h-10 rounded-full bg-[#F7F5F0] text-[#CF9F5D] mx-auto flex items-center justify-center">
-            <Compass className="w-5 h-5 text-[#CF9F5D]" />
+        <div className="py-8 px-4 rounded-xl border border-stone-200/80 bg-white text-center space-y-2">
+          <div className="w-8 h-8 rounded-full bg-[#F7F5F0] text-[#CF9F5D] mx-auto flex items-center justify-center">
+            <MapPin className="w-4 h-4 text-[#CF9F5D]" />
           </div>
-          <div className="max-w-md mx-auto space-y-1">
-            <h4 className="text-sm font-bold text-[#171717]">
-              Community Location: {property.area}, Dubai
+          <div>
+            <h4 className="text-xs font-bold text-stone-900">
+              {property.area}, Dubai
             </h4>
-            <p className="text-xs text-[#6F6F6F]">
-              Precise pin coordinates will render automatically once Latitude and Longitude are populated in the Baserow record by property management.
+            <p className="text-[11px] text-stone-500 max-w-sm mx-auto mt-0.5">
+              Interactive GPS pin coordinates for this residence are being updated.
             </p>
           </div>
-          <div className="pt-2">
+          <div className="pt-1">
             <a
               href={googleMapsSearchUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#171717] text-white text-xs font-semibold hover:bg-[#2A2A2A] transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-stone-900 text-white text-[11px] font-medium hover:bg-stone-800 transition-colors"
             >
-              <span>Search {property.area} on Google Maps</span>
-              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Explore {property.area} on Maps</span>
+              <ExternalLink className="w-3 h-3" />
             </a>
           </div>
         </div>
       )}
 
-      {/* External Map Direct Links */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs text-[#6F6F6F]">
-        <span className="text-[11px] text-[#8A8A8A]">
+      {/* Discreet Footer Note */}
+      <div className="flex items-center justify-between text-[11px] text-stone-400 pt-0.5 px-0.5">
+        <span>
           {hasCoordinates
-            ? `* GPS coordinates mapped from Baserow: ${formattedCoordinates}`
-            : `* District: ${property.area}, Dubai`}
+            ? 'Verified Dubai GPS coordinates'
+            : `Community: ${property.area}, Dubai`}
         </span>
-
-        <div className="flex items-center gap-3">
-          <a
-            href={googleMapsSearchUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 font-bold text-[#171717] hover:text-[#A67C3D] transition-colors"
-          >
-            <span>Open in Google Maps</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        </div>
+        <a
+          href={googleMapsDirectionsUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="hover:text-stone-700 transition-colors"
+        >
+          Get Directions ↗
+        </a>
       </div>
     </div>
   );

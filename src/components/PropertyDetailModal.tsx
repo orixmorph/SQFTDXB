@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   X,
   MapPin,
@@ -21,15 +21,21 @@ import {
   FileText,
   Clock,
   Building2,
+  Loader2,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Property, ViewingRequestData } from '../types';
 import { PropertyMapSection } from './PropertyMapSection';
+import { submitScheduleViewingForm } from '../services/googleSheets';
 
 interface PropertyDetailModalProps {
   property: Property | null;
   onClose: () => void;
   isSaved?: boolean;
   onToggleSave?: (propertyId: string, e: React.MouseEvent) => void;
+  allProperties?: Property[];
+  onSelectProperty?: (property: Property) => void;
 }
 
 export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
@@ -37,13 +43,50 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   onClose,
   isSaved = false,
   onToggleSave,
+  allProperties = [],
+  onSelectProperty,
 }) => {
   if (!property) return null;
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showViewingForm, setShowViewingForm] = useState(false);
   const [viewingFormSubmitted, setViewingFormSubmitted] = useState(false);
+  const [showSharePopover, setShowSharePopover] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Minimized share link: e.g. https://.../p/SQFT-1 or ?property=...
+  const shortShareUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/p/${encodeURIComponent(property.id || property.slug)}`
+    : '';
+
+  const handleCopyShortUrl = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (navigator.clipboard && shortShareUrl) {
+      navigator.clipboard.writeText(shortShareUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2200);
+    }
+  };
+
+  const handleWhatsAppShare = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const text = `Take a look at this verified luxury listing on SQFT DXB: ${property.title} in ${property.area} - ${shortShareUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  // Find all properties represented by this specific agent in the database
+  const agentProperties = useMemo(() => {
+    if (!property?.agent?.name || !allProperties || allProperties.length === 0) return [];
+    const targetAgentName = property.agent.name.trim().toLowerCase();
+    return allProperties.filter((p) => {
+      const pName = (p.agent?.name || '').trim().toLowerCase();
+      return pName === targetAgentName;
+    });
+  }, [property, allProperties]);
+
+  const agentListingCount = agentProperties.length > 0
+    ? agentProperties.length
+    : (property.agent?.propertyCount || 1);
 
   const [viewingData, setViewingData] = useState<ViewingRequestData>({
     propertyId: property.id,
@@ -52,7 +95,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
     email: '',
     phone: '',
     preferredDate: '',
-    preferredTime: '10:00 AM - 12:00 PM',
+    preferredTime: '',
     viewingType: 'In-person',
     notes: '',
   });
@@ -68,12 +111,6 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
   const prevImage = () => {
     setActiveImageIndex((prev) => (prev - 1 + propertyImages.length) % propertyImages.length);
-  };
-
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2500);
   };
 
   // Baserow Database Compatibility Resolvers (accepts standard or custom column keys)
@@ -196,57 +233,43 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   const WHATSAPP_NUMBER = '971588648093';
   const CALL_NUMBER = '+971588648093';
 
-  // Pre-written WhatsApp Message for Request Private Viewing
-  const viewingWhatsAppText = `Hello SQFT DXB,
+  // User-specified WhatsApp pre-filled message:
+  // "Hi, I'm interested in Property [PROPERTY_REFERENCE] in [AREA]."
+  const propertyRef = property.referenceNumber || property.property_id || property.id;
+  const propertyArea = property.area || 'Dubai';
+  const whatsAppMessage = `Hi, I'm interested in Property ${propertyRef} in ${propertyArea}.`;
 
-I would like to request a private viewing for this property:
+  const rawAgentWhatsApp = property.agent?.whatsapp || property.agent?.phone || WHATSAPP_NUMBER;
+  const targetWhatsApp = rawAgentWhatsApp.replace(/[^0-9]/g, '') || WHATSAPP_NUMBER;
 
-• Property: ${property.title}
-• Reference No: ${property.referenceNumber || property.reraPermit || property.id}
-• Price: ${property.priceDisplay} (${property.purpose === 'rent' ? 'For Rent' : 'For Sale'})
-• Community: ${property.area}
-• Bedrooms: ${displayBedrooms}
-• Total Area: ${displayTotalArea}
+  const viewingWhatsAppUrl = `https://wa.me/${targetWhatsApp}?text=${encodeURIComponent(whatsAppMessage)}`;
+  const inquiryWhatsAppUrl = `https://wa.me/${targetWhatsApp}?text=${encodeURIComponent(whatsAppMessage)}`;
 
-Please let me know the available private viewing inspection slots. Thank you!`;
+  const [submittingViewing, setSubmittingViewing] = useState(false);
 
-  const viewingWhatsAppUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(viewingWhatsAppText)}`;
-
-  // Pre-written WhatsApp Message for Quick Agent Inquiry
-  const inquiryWhatsAppText = `Hello SQFT DXB,
-
-I am interested in this ready property:
-• Property: ${property.title}
-• Reference: ${property.referenceNumber || property.reraPermit || property.id}
-• Community: ${property.area}
-• Price: ${property.priceDisplay}
-
-Could you please provide more details and title deed verification? Thank you!`;
-
-  const inquiryWhatsAppUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(inquiryWhatsAppText)}`;
-
-  const handleViewingSubmit = (e: React.FormEvent) => {
+  const handleViewingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setViewingFormSubmitted(true);
-
-    const customText = `Hello SQFT DXB,
-
-I would like to schedule a private viewing:
-
-• Property: ${property.title}
-• Reference No: ${property.referenceNumber || property.reraPermit || property.id}
-• Community: ${property.area}
-• Price: ${property.priceDisplay}
-• Client Name: ${viewingData.fullName}
-• Phone: ${viewingData.phone}
-• Preferred Date: ${viewingData.preferredDate || 'Earliest Available'}
-• Preferred Slot: ${viewingData.preferredTime}
-• Viewing Type: ${viewingData.viewingType}
-
-Please confirm access clearance. Thank you!`;
-
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(customText)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    setSubmittingViewing(true);
+    try {
+      await submitScheduleViewingForm({
+        propertyId: String(propertyRef || property.id),
+        propertyTitle: property.title,
+        propertyPrice: property.price,
+        propertyArea: property.area,
+        fullName: viewingData.fullName,
+        phone: viewingData.phone,
+        email: viewingData.email,
+        date: viewingData.date,
+        timeSlot: viewingData.preferredTime || viewingData.viewingType,
+        message: `${viewingData.viewingType || 'In-person'} viewing tour requested for ${property.title}.`,
+      });
+    } catch (err) {
+      console.error('Error submitting viewing request to Google Sheets:', err);
+    } finally {
+      setSubmittingViewing(false);
+      setViewingFormSubmitted(true);
+      window.open(viewingWhatsAppUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -286,24 +309,85 @@ Please confirm access clearance. Thank you!`;
               </button>
             )}
 
-            <button
-              id="modal-share-btn"
-              onClick={handleShare}
-              className="p-2 rounded-full hover:bg-[#F7F7F5] text-[#171717] transition-colors relative"
-              title="Share Link"
-            >
-              <Share2 className="w-5 h-5 stroke-[1.75]" />
-              {copiedLink && (
-                <span className="absolute -bottom-8 right-0 text-[11px] font-semibold bg-[#171717] text-white px-2 py-0.5 rounded shadow whitespace-nowrap">
-                  Link Copied!
-                </span>
+            {/* Minimized Share Option */}
+            <div className="relative">
+              <button
+                id="modal-share-btn"
+                onClick={() => setShowSharePopover(!showSharePopover)}
+                className="p-2 rounded-full hover:bg-[#F7F7F5] text-[#171717] transition-colors relative cursor-pointer"
+                title="Share Minimized Link"
+                aria-label="Share property link"
+              >
+                <Share2 className="w-5 h-5 stroke-[1.75]" />
+                {copiedLink && !showSharePopover && (
+                  <span className="absolute -bottom-8 right-0 text-[11px] font-semibold bg-[#171717] text-white px-2.5 py-0.5 rounded-full shadow whitespace-nowrap z-30">
+                    Short Link Copied!
+                  </span>
+                )}
+              </button>
+
+              {/* Share Popover */}
+              {showSharePopover && (
+                <div className="absolute right-0 top-12 z-50 w-72 sm:w-80 p-4 bg-white rounded-2xl border border-[#EAEAEA] shadow-2xl space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#F0F0EE]">
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-[#171717]">
+                      <Share2 className="w-3.5 h-3.5 text-[#CF9F5D]" />
+                      <span>Share Minimized Listing</span>
+                    </div>
+                    <button
+                      onClick={() => setShowSharePopover(false)}
+                      className="text-[#8A8A8A] hover:text-[#171717] p-1 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#8A8A8A] uppercase tracking-wider mb-1">
+                      Short Link
+                    </label>
+                    <div className="flex items-center gap-1.5 p-1.5 bg-[#F7F7F5] border border-[#EAEAEA] rounded-xl">
+                      <input
+                        type="text"
+                        readOnly
+                        value={shortShareUrl}
+                        className="bg-transparent text-xs text-[#171717] flex-1 px-1 outline-none select-all font-mono"
+                      />
+                      <button
+                        onClick={handleCopyShortUrl}
+                        className="px-2.5 py-1 rounded-lg bg-[#171717] hover:bg-[#CF9F5D] text-white text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer flex-shrink-0"
+                      >
+                        {copiedLink ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedLink ? 'Copied' : 'Copy'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      onClick={handleWhatsAppShare}
+                      className="py-2 px-3 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </button>
+
+                    <button
+                      onClick={handleCopyShortUrl}
+                      className="py-2 px-3 rounded-xl bg-[#F7F7F5] hover:bg-[#EAEAEA] text-[#171717] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Check className="w-3.5 h-3.5 text-[#CF9F5D]" />
+                      <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+                    </button>
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
 
             <button
               id="modal-close-btn"
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-[#F7F7F5] text-[#171717] transition-colors ml-1"
+              className="p-2 rounded-full hover:bg-[#F7F7F5] text-[#171717] transition-colors ml-1 cursor-pointer"
               aria-label="Close details"
             >
               <X className="w-6 h-6" />
@@ -312,19 +396,42 @@ Please confirm access clearance. Thank you!`;
         </div>
 
         {/* Scrollable Modal Content */}
-        <div className="overflow-y-auto p-6 md:p-8 space-y-8 flex-1">
-          {/* Image Gallery */}
+        <div id="property-detail-modal-body" className="overflow-y-auto p-6 md:p-8 space-y-8 flex-1">
+          {/* Image Gallery with Anti-Download Protection */}
           <div className="space-y-3">
-            <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full rounded-2xl overflow-hidden bg-[#F7F7F5]">
+            <div
+              className="relative aspect-[16/9] sm:aspect-[21/9] w-full rounded-2xl overflow-hidden bg-[#F7F7F5] secure-image-container select-none"
+              onContextMenu={(e) => e.preventDefault()}
+              onDragStart={(e) => e.preventDefault()}
+            >
               <img
                 src={propertyImages[activeImageIndex] || propertyImages[0]}
                 alt={property.title || 'Property View'}
                 referrerPolicy="no-referrer"
+                draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src =
                     'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85';
                 }}
-                className="w-full h-full object-cover transition-all duration-300"
+                className="secure-image w-full h-full object-cover transition-all duration-300 select-none pointer-events-none"
+              />
+
+              {/* Centered 35% Opacity Pure White Watermark Protection (No Text) */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10">
+                <img
+                  src="https://res.cloudinary.com/dy6km7beb/image/upload/c_crop,w_450,h_450,x_25,y_103/v1789980615/Untitled_design_11_ocowpa.png"
+                  alt="SQFT DXB Watermark"
+                  draggable={false}
+                  className="w-28 sm:w-36 md:w-44 h-auto object-contain opacity-35 select-none pointer-events-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)] filter brightness-0 invert"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+
+              {/* Transparent Click-Protection Overlay to Prevent Image Saving */}
+              <div
+                className="absolute inset-0 z-[6] select-none pointer-events-none"
+                onContextMenu={(e) => e.preventDefault()}
               />
 
               {/* Gallery Controls */}
@@ -332,17 +439,17 @@ Please confirm access clearance. Thank you!`;
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/85 backdrop-blur-md text-[#171717] hover:bg-white shadow-md transition-all cursor-pointer"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/85 backdrop-blur-md text-[#171717] hover:bg-white shadow-md transition-all cursor-pointer z-20"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/85 backdrop-blur-md text-[#171717] hover:bg-white shadow-md transition-all cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/85 backdrop-blur-md text-[#171717] hover:bg-white shadow-md transition-all cursor-pointer z-20"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
-                  <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-xs font-medium">
+                  <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-xs font-medium z-20">
                     {activeImageIndex + 1} / {propertyImages.length}
                   </div>
                 </>
@@ -351,12 +458,15 @@ Please confirm access clearance. Thank you!`;
 
             {/* Thumbnail Strip */}
             {propertyImages.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+              <div
+                className="flex gap-3 overflow-x-auto pb-1 no-scrollbar select-none"
+                onContextMenu={(e) => e.preventDefault()}
+              >
                 {propertyImages.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`relative flex-shrink-0 w-20 sm:w-24 aspect-[16/10] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                    className={`relative flex-shrink-0 w-20 sm:w-24 aspect-[16/10] rounded-xl overflow-hidden border-2 transition-all cursor-pointer select-none ${
                       activeImageIndex === idx
                         ? 'border-[#CF9F5D] scale-102 shadow-sm'
                         : 'border-transparent opacity-70 hover:opacity-100'
@@ -366,11 +476,13 @@ Please confirm access clearance. Thank you!`;
                       src={img}
                       alt="thumbnail"
                       referrerPolicy="no-referrer"
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src =
                           'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85';
                       }}
-                      className="w-full h-full object-cover"
+                      className="secure-image w-full h-full object-cover select-none pointer-events-none"
                     />
                   </button>
                 ))}
@@ -381,21 +493,30 @@ Please confirm access clearance. Thank you!`;
           {/* Core Price & Title Block */}
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-[#F0F0EE]">
             <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => {
-                  document.getElementById('property-map-section')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="flex items-center gap-2 text-xs font-semibold text-[#CF9F5D] hover:text-[#A67C3D] uppercase tracking-wider transition-colors cursor-pointer group"
-              >
-                <MapPin className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
-                <span>
-                  {property.projectName}, {property.area}, Dubai
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#171717] tracking-wide">
+                  <MapPin className="w-3.5 h-3.5 text-[#CF9F5D] flex-shrink-0" />
+                  <span>{property.projectName ? `${property.projectName}, ` : ''}{property.area}, Dubai</span>
                 </span>
-                <span className="text-[10px] lowercase font-normal text-[#8A8A8A] group-hover:underline">
-                  (view map pin ↓)
-                </span>
-              </button>
+
+                <button
+                  type="button"
+                  id="jump-to-map-pin-btn"
+                  onClick={() => {
+                    const el = document.getElementById('property-map-section');
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      el.classList.add('ring-2', 'ring-[#CF9F5D]/60', 'ring-offset-2');
+                      setTimeout(() => el.classList.remove('ring-2', 'ring-[#CF9F5D]/60', 'ring-offset-2'), 2500);
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 hover:bg-[#CF9F5D]/10 text-stone-600 hover:text-[#171717] border border-stone-200 hover:border-[#CF9F5D]/40 text-xs font-medium transition-all duration-200 cursor-pointer shadow-2xs group"
+                  title="Scroll to view property map & neighborhood"
+                >
+                  <MapPin className="w-3 h-3 text-[#CF9F5D] group-hover:scale-110 transition-transform" />
+                  <span>View on Map ↓</span>
+                </button>
+              </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#171717] tracking-tight leading-snug">
                 {property.title}
               </h1>
@@ -681,18 +802,24 @@ Please confirm access clearance. Thank you!`;
                     src={property.agent.photo}
                     alt={property.agent.name}
                     referrerPolicy="no-referrer"
-                    className="w-14 h-14 rounded-full object-cover border-2 border-[#CF9F5D]"
+                    className="w-14 h-14 rounded-full object-cover object-top border-2 border-[#CF9F5D] shadow-sm flex-shrink-0"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(property.agent?.name || 'SQFT Advisor')}&background=CF9F5D&color=fff&size=150`;
+                    }}
                   />
-                  <div>
-                    <h4 className="text-base font-bold text-[#171717]">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-base font-bold text-[#171717] truncate">
                       {property.agent.name}
                     </h4>
-                    <p className="text-xs text-[#6F6F6F] font-medium">
+                    <p className="text-xs text-[#6F6F6F] font-medium truncate">
                       {property.agent.title}
                     </p>
-                    <span className="text-[11px] text-[#CF9F5D] font-semibold">
-                      {property.agent.verifiedDeals} Deals
-                    </span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#CF9F5D] bg-[#CF9F5D]/10 px-2 py-0.5 rounded-md border border-[#CF9F5D]/20">
+                        <Building2 className="w-3 h-3 text-[#CF9F5D]" />
+                        <span>{agentListingCount} {agentListingCount === 1 ? 'Listing' : 'Listings'}</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -750,6 +877,96 @@ Please confirm access clearance. Thank you!`;
                   As a ready property, physical viewings can be arranged within 2-4 hours with keys held in escrow or directly through our senior advisor.
                 </p>
               </div>
+
+              {/* Properties Represented by this Advisor (2, 3, or whatever properties they have) */}
+              {agentProperties.length > 0 && (
+                <div className="p-5 rounded-2xl bg-[#F7F7F5] border border-[#EAEAEA] space-y-3.5">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#EAEAEA]">
+                    <div>
+                      <h4 className="text-sm font-bold text-[#171717]">
+                        {property.agent?.name}&apos;s Portfolio
+                      </h4>
+                      <p className="text-[11px] text-[#6F6F6F]">
+                        {agentProperties.length} verified {agentProperties.length === 1 ? 'property' : 'properties'} assigned in database
+                      </p>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#CF9F5D]/15 text-[#CF9F5D]">
+                      {agentProperties.length} {agentProperties.length === 1 ? 'Listing' : 'Listings'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {agentProperties.map((p) => {
+                      const isCurrent = p.id === property.id || p.slug === property.slug;
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => {
+                            if (!isCurrent && onSelectProperty) {
+                              onSelectProperty(p);
+                              const modalBody = document.getElementById('property-detail-modal-body');
+                              if (modalBody) modalBody.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                          }}
+                          className={`p-2.5 rounded-xl border transition-all flex items-center gap-3 ${
+                            isCurrent
+                              ? 'bg-white border-[#CF9F5D] ring-1 ring-[#CF9F5D]/30 shadow-xs cursor-default'
+                              : 'bg-white border-[#EAEAEA] hover:border-[#CF9F5D]/70 hover:shadow-sm cursor-pointer group/prop'
+                          }`}
+                        >
+                          <div
+                            className="relative w-16 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-stone-100 secure-image-container select-none"
+                            onContextMenu={(e) => e.preventDefault()}
+                          >
+                            <img
+                              src={p.images?.[0] || 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=300&q=80'}
+                              alt={p.title}
+                              referrerPolicy="no-referrer"
+                              draggable={false}
+                              onContextMenu={(e) => e.preventDefault()}
+                              className="secure-image w-full h-full object-cover transition-transform duration-300 group-hover/prop:scale-105 select-none pointer-events-none"
+                            />
+                            {/* Centered White Logo Watermark */}
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10">
+                              <img
+                                src="https://res.cloudinary.com/dy6km7beb/image/upload/c_crop,w_450,h_450,x_25,y_103/v1789980615/Untitled_design_11_ocowpa.png"
+                                alt="SQFT"
+                                draggable={false}
+                                className="w-6 h-auto object-contain opacity-35 select-none pointer-events-none drop-shadow filter brightness-0 invert"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="text-xs font-bold text-[#171717] truncate">
+                                {p.priceDisplay}
+                              </span>
+                              {isCurrent ? (
+                                <span className="text-[9px] font-bold text-[#CF9F5D] bg-[#CF9F5D]/10 px-1.5 py-0.5 rounded">
+                                  Current
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-medium text-[#CF9F5D] group-hover/prop:translate-x-0.5 transition-transform">
+                                  View →
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] font-medium text-[#171717] truncate leading-tight mt-0.5">
+                              {p.title}
+                            </p>
+                            <div className="flex items-center gap-1.5 text-[10px] text-[#8A8A8A] mt-1 truncate">
+                              <span className="truncate">{p.projectName || p.area}</span>
+                              <span>•</span>
+                              <span className="flex-shrink-0">{p.bedrooms ?? p.bedroom ?? '—'} Beds</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -780,8 +997,12 @@ Please confirm access clearance. Thank you!`;
                     Viewing Request Forwarded!
                   </h4>
                   <p className="text-xs text-[#6F6F6F] max-w-md mx-auto">
-                    Thank you {viewingData.fullName}. Your viewing slot for {property.title} has been forwarded to WhatsApp (+971 58 864 8093).
+                    Thank you {viewingData.fullName}. Your viewing request for {property.title} has been logged and forwarded to WhatsApp.
                   </p>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E6F4EA] text-[11px] font-semibold text-[#0F9D58] border border-[#CEEAD6]">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Viewing Request Securely Received & Logged</span>
+                  </div>
                   <div className="flex items-center justify-center gap-2 pt-2">
                     <a
                       href={viewingWhatsAppUrl}
@@ -797,7 +1018,7 @@ Please confirm access clearance. Thank you!`;
                         setShowViewingForm(false);
                         setViewingFormSubmitted(false);
                       }}
-                      className="px-4 py-2 rounded-lg bg-[#F7F7F5] border border-[#EAEAEA] text-[#171717] text-xs font-semibold hover:bg-white"
+                      className="px-4 py-2 rounded-lg bg-[#F7F7F5] border border-[#EAEAEA] text-[#171717] text-xs font-semibold hover:bg-white cursor-pointer"
                     >
                       Done
                     </button>
@@ -817,7 +1038,7 @@ Please confirm access clearance. Thank you!`;
                         onChange={(e) =>
                           setViewingData({ ...viewingData, fullName: e.target.value })
                         }
-                        placeholder="e.g. Alexander Wright"
+                        placeholder="Full Name"
                         className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
                       />
                     </div>
@@ -833,7 +1054,7 @@ Please confirm access clearance. Thank you!`;
                         onChange={(e) =>
                           setViewingData({ ...viewingData, phone: e.target.value })
                         }
-                        placeholder="+971 50 123 4567"
+                        placeholder="Phone Number"
                         className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
                       />
                     </div>
@@ -849,7 +1070,7 @@ Please confirm access clearance. Thank you!`;
                         onChange={(e) =>
                           setViewingData({ ...viewingData, email: e.target.value })
                         }
-                        placeholder="alexander@example.com"
+                        placeholder="Email Address"
                         className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
                       />
                     </div>
@@ -901,6 +1122,7 @@ Please confirm access clearance. Thank you!`;
                         }
                         className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
                       >
+                        <option value="">Select Time Slot</option>
                         <option value="Morning (09:00 AM - 12:00 PM)">Morning (09:00 AM - 12:00 PM)</option>
                         <option value="Afternoon (12:00 PM - 03:00 PM)">Afternoon (12:00 PM - 03:00 PM)</option>
                         <option value="Late Afternoon (03:00 PM - 06:00 PM)">Late Afternoon (03:00 PM - 06:00 PM)</option>
@@ -919,10 +1141,15 @@ Please confirm access clearance. Thank you!`;
                     </button>
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-bold transition-colors shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
+                      disabled={submittingViewing}
+                      className="px-6 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-bold transition-colors shadow-sm inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-70"
                     >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>Confirm & Open WhatsApp</span>
+                      {submittingViewing ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <MessageSquare className="w-3.5 h-3.5" />
+                      )}
+                      <span>{submittingViewing ? 'Saving...' : 'Confirm & Open WhatsApp'}</span>
                     </button>
                   </div>
                 </form>

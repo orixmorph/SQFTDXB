@@ -126,8 +126,8 @@ export const Hero: React.FC<HeroProps> = ({
 
         {/* Hero Headline & Subtitle */}
         <div className="text-center max-w-3xl mx-auto mb-6">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#171717] tracking-tight leading-[1.15] mb-2.5 uppercase">
-            WE FIND, YOU MOVE IN
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#171717] tracking-tight leading-[1.15] mb-2.5">
+            We Find, You Move in
           </h1>
           <p className="text-sm sm:text-base text-[#4A4A4A] font-medium leading-relaxed max-w-2xl mx-auto">
             Discover verified secondary market residences, commercial spaces, and ready properties across Dubai’s most desirable communities. Actual photos, confirmed availability, and immediate handover.

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, Building2, Upload, TrendingUp, Key, ShieldCheck } from 'lucide-react';
+import { X, CheckCircle2, Building2, Upload, TrendingUp, Key, ShieldCheck, Loader2 } from 'lucide-react';
 import { PropertyPurpose, PropertyType, PropertyListingSubmission } from '../types';
 import { areas } from '../data/mockData';
+import { submitPropertyListingForm } from '../services/googleSheets';
 
 interface ListPropertyModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
 
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<PropertyListingSubmission>({
     purpose: defaultPurpose,
@@ -33,9 +35,29 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
     notes: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await submitPropertyListingForm({
+        purpose: formData.purpose,
+        propertyType: formData.propertyType,
+        area: formData.area,
+        buildingName: formData.buildingName,
+        bedrooms: formData.bedrooms,
+        expectedPrice: formData.expectedPrice,
+        ownerName: formData.ownerName,
+        ownerPhone: formData.ownerPhone,
+        ownerEmail: formData.ownerEmail,
+        currentStatus: formData.currentStatus,
+        notes: formData.notes,
+      });
+    } catch (err) {
+      console.error('Error submitting to Google Sheets:', err);
+    } finally {
+      setSubmitting(false);
+      setSubmitted(true);
+    }
   };
 
   const handleResetAndClose = () => {
@@ -69,10 +91,14 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
             <p className="text-sm text-[#6F6F6F] max-w-md mx-auto leading-relaxed">
               Thank you {formData.ownerName}. A senior SQFT DXB secondary specialist will review your property details and contact you at <span className="font-semibold text-[#171717]">{formData.ownerPhone}</span> within 2 business hours for a complimentary comparative market evaluation.
             </p>
-            <div className="pt-4">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E6F4EA] text-[11px] font-semibold text-[#0F9D58] border border-[#CEEAD6]">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Inquiry Securely Received & Logged</span>
+            </div>
+            <div className="pt-3">
               <button
                 onClick={handleResetAndClose}
-                className="px-6 py-2.5 rounded-xl bg-[#171717] text-white text-xs font-semibold hover:bg-[#2A2A2A]"
+                className="px-6 py-2.5 rounded-xl bg-[#171717] text-white text-xs font-semibold hover:bg-[#2A2A2A] cursor-pointer"
               >
                 Back to SQFT DXB
               </button>
@@ -89,7 +115,7 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
                 List Your Secondary Property
               </h2>
               <p className="text-xs sm:text-sm text-[#6F6F6F] mt-1">
-                Connect directly with pre-screened cash buyers and vetted corporate tenants with verified Form A authorization.
+                Connect directly with pre-screened qualified buyers and vetted tenants with verified Form A authorization.
               </p>
             </div>
 
@@ -259,7 +285,7 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Rashid Al-Husseini"
+                        placeholder="Full Name"
                         value={formData.ownerName}
                         onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
                         className="w-full px-3 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
@@ -273,7 +299,7 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
                       <input
                         type="tel"
                         required
-                        placeholder="+971 50 123 4567"
+                        placeholder="Phone Number"
                         value={formData.ownerPhone}
                         onChange={(e) => setFormData({ ...formData, ownerPhone: e.target.value })}
                         className="w-full px-3 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
@@ -288,7 +314,7 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
                     <input
                       type="email"
                       required
-                      placeholder="owner@example.com"
+                      placeholder="Email Address"
                       value={formData.ownerEmail}
                       onChange={(e) => setFormData({ ...formData, ownerEmail: e.target.value })}
                       className="w-full px-3 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
@@ -323,7 +349,7 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
                     </label>
                     <textarea
                       rows={2}
-                      placeholder="High floor, upgraded kitchen, ready title deed in hand..."
+                      placeholder="Notes (optional)"
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       className="w-full px-3 py-2 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
@@ -341,9 +367,11 @@ export const ListPropertyModal: React.FC<ListPropertyModalProps> = ({
 
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-xl bg-[#CF9F5D] hover:bg-[#BE8E4D] active:bg-[#AB7E3F] text-white text-xs font-bold transition-all duration-200 cursor-pointer shadow-sm hover:shadow-[0_4px_14px_rgba(207,159,93,0.35)]"
+                      disabled={submitting}
+                      className="px-6 py-2.5 rounded-xl bg-[#CF9F5D] hover:bg-[#BE8E4D] active:bg-[#AB7E3F] text-white text-xs font-bold transition-all duration-200 cursor-pointer shadow-sm hover:shadow-[0_4px_14px_rgba(207,159,93,0.35)] inline-flex items-center gap-2 disabled:opacity-70"
                     >
-                      Submit Listing Request
+                      {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                      <span>{submitting ? 'Submitting...' : 'Submit Listing Request'}</span>
                     </button>
                   </div>
                 </div>

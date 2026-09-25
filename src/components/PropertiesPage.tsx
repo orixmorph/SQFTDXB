@@ -70,6 +70,18 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
     setSortBy('featured');
   };
 
+  // Compute total number of listings held by each agent in the database
+  const agentListingCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of properties) {
+      const name = (p.agent?.name || '').trim().toLowerCase();
+      if (name) {
+        counts[name] = (counts[name] || 0) + 1;
+      }
+    }
+    return counts;
+  }, [properties]);
+
   const filteredProperties = useMemo(() => {
     return properties
       .filter((item) => {
@@ -332,15 +344,20 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
         {/* Property Grid: 3-4 on Desktop, 2 on Tablet, 1 on Mobile */}
         {filteredProperties.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProperties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                onSelect={onSelectProperty}
-                isSaved={savedPropertyIds.includes(property.id)}
-                onToggleSave={onToggleSaveProperty}
-              />
-            ))}
+            {filteredProperties.map((property) => {
+              const agentKey = (property.agent?.name || '').trim().toLowerCase();
+              const count = agentKey ? (agentListingCounts[agentKey] || property.agent?.propertyCount || 1) : 1;
+              return (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  onSelect={onSelectProperty}
+                  isSaved={savedPropertyIds.includes(property.id)}
+                  onToggleSave={onToggleSaveProperty}
+                  agentListingCount={count}
+                />
+              );
+            })}
           </div>
         ) : (
           /* Empty State */

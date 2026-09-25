@@ -8,21 +8,38 @@ import {
   CheckCircle2,
   Building2,
   ShieldCheck,
+  Loader2,
 } from 'lucide-react';
+import { submitContactUsForm } from '../services/googleSheets';
 
 export const ContactView: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    subject: 'Property Purchase Inquiry',
+    subject: '',
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await submitContactUsForm({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message,
+      });
+    } catch (err) {
+      console.error('Error submitting contact form:', err);
+    } finally {
+      setSubmitting(false);
+      setSubmitted(true);
+    }
   };
 
   return (
@@ -110,19 +127,25 @@ export const ContactView: React.FC = () => {
           <div className="lg:col-span-7 bg-[#F7F7F5] p-6 sm:p-10 rounded-3xl border border-[#EAEAEA]">
             {submitted ? (
               <div className="text-center py-12 space-y-3">
-                <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto" />
+                <CheckCircle2 className="w-12 h-12 text-[#0F9D58] mx-auto" />
                 <h3 className="text-2xl font-bold text-[#171717]">
                   Thank You for Reaching Out
                 </h3>
                 <p className="text-sm text-[#6F6F6F] max-w-md mx-auto">
                   We have received your message. A licensed secondary advisor will respond within 2 hours during office hours.
                 </p>
-                <button
-                  onClick={() => setSubmitted(false)}
-                  className="mt-4 px-5 py-2.5 rounded-xl bg-[#171717] text-white text-xs font-semibold"
-                >
-                  Send Another Inquiry
-                </button>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E6F4EA] text-[11px] font-semibold text-[#0F9D58] border border-[#CEEAD6]">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Inquiry Securely Received & Logged</span>
+                </div>
+                <div className="pt-2">
+                  <button
+                    onClick={() => setSubmitted(false)}
+                    className="mt-2 px-5 py-2.5 rounded-xl bg-[#171717] text-white text-xs font-semibold hover:bg-[#2A2A2A] cursor-pointer"
+                  >
+                    Send Another Inquiry
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -138,7 +161,7 @@ export const ContactView: React.FC = () => {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Maya Al-Saleh"
+                      placeholder="Full Name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
@@ -152,7 +175,7 @@ export const ContactView: React.FC = () => {
                     <input
                       type="email"
                       required
-                      placeholder="maya@example.com"
+                      placeholder="Email Address"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
@@ -168,7 +191,7 @@ export const ContactView: React.FC = () => {
                     <input
                       type="tel"
                       required
-                      placeholder="+971 50 000 0000"
+                      placeholder="Phone Number"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
@@ -177,29 +200,31 @@ export const ContactView: React.FC = () => {
 
                   <div>
                     <label className="block text-xs font-semibold text-[#171717] mb-1">
-                      Inquiry Topic
+                      Topic
                     </label>
                     <select
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
                     >
-                      <option value="Property Purchase Inquiry">Buying a Ready Secondary Property</option>
-                      <option value="Rental Inquiry">Renting a Ready Residence</option>
-                      <option value="List a Property">Listing My Secondary Property</option>
-                      <option value="Valuation Request">Property Valuation & Advisory</option>
+                      <option value="">Select Topic</option>
+                      <option value="Buy">Buy</option>
+                      <option value="Rent">Rent</option>
+                      <option value="List Property">List Property</option>
+                      <option value="Valuation">Valuation</option>
+                      <option value="General Inquiry">General Inquiry</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-[#171717] mb-1">
-                    Message / Preferred Community
+                    Message
                   </label>
                   <textarea
                     rows={4}
                     required
-                    placeholder="Tell us what you are looking for (e.g. 2-bed apartment in Dubai Marina, ready to move, budget around AED 3.5M)..."
+                    placeholder="Message"
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-white border border-[#EAEAEA] rounded-xl text-sm focus:outline-none focus:border-[#CF9F5D]"
@@ -209,9 +234,11 @@ export const ContactView: React.FC = () => {
                 <div className="pt-2">
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] text-white text-xs font-bold transition-all shadow-sm"
+                    disabled={submitting}
+                    className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#171717] hover:bg-[#2A2A2A] text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-70 inline-flex items-center justify-center gap-2"
                   >
-                    Submit Advisory Request
+                    {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    <span>{submitting ? 'Sending Request...' : 'Submit Advisory Request'}</span>
                   </button>
                 </div>
               </form>

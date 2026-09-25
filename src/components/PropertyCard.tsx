@@ -1,5 +1,5 @@
-import React from 'react';
-import { Heart, ArrowUpRight, Bed, Bath, Maximize2, ShieldCheck, CheckCircle2, MapPin } from 'lucide-react';
+import React, { useState } from 'react';
+import { Heart, ArrowUpRight, Bed, Bath, Maximize2, ShieldCheck, CheckCircle2, MapPin, Share2, Check } from 'lucide-react';
 import { Property } from '../types';
 
 interface PropertyCardProps {
@@ -7,6 +7,7 @@ interface PropertyCardProps {
   onSelect: (property: Property) => void;
   isSaved?: boolean;
   onToggleSave?: (propertyId: string, e: React.MouseEvent) => void;
+  agentListingCount?: number;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
@@ -14,28 +15,64 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   onSelect,
   isSaved = false,
   onToggleSave,
+  agentListingCount,
 }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shortUrl = `${window.location.origin}/p/${encodeURIComponent(property.id || property.slug)}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shortUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    }
+  };
+
   return (
     <div
       id={`property-card-${property.id}`}
       onClick={() => onSelect(property)}
       className="group relative bg-white rounded-2xl overflow-hidden border border-[#EAEAEA] hover:border-[#CF9F5D]/50 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col cursor-pointer"
     >
-      {/* Property Image Container */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#F7F7F5]">
+      {/* Property Image Container with Anti-Download Protection */}
+      <div
+        className="relative aspect-[16/10] w-full overflow-hidden bg-[#F7F7F5] secure-image-container select-none"
+        onContextMenu={(e) => e.preventDefault()}
+        onDragStart={(e) => e.preventDefault()}
+      >
         <img
           src={property.images?.[0] || 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85'}
           alt={property.title || 'Dubai Property'}
           referrerPolicy="no-referrer"
           loading="lazy"
+          draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src =
               'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85';
           }}
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          className="secure-image w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 select-none pointer-events-none"
         />
 
-        {/* Top Badges */}
+        {/* Centered 35% Opacity Pure White Watermark Protection (No Text) */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10">
+          <img
+            src="https://res.cloudinary.com/dy6km7beb/image/upload/c_crop,w_450,h_450,x_25,y_103/v1789980615/Untitled_design_11_ocowpa.png"
+            alt="SQFT DXB Watermark"
+            draggable={false}
+            className="w-16 sm:w-20 h-auto object-contain opacity-35 select-none pointer-events-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)] filter brightness-0 invert"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+
+        {/* Transparent Click-Protection Overlay to Prevent Image Saving */}
+        <div
+          className="absolute inset-0 z-[6] select-none pointer-events-none"
+          onContextMenu={(e) => e.preventDefault()}
+        />
+
+        {/* Top Badges & Actions */}
         <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between pointer-events-none">
           <div className="flex items-center gap-1.5 flex-wrap">
             {/* Purpose Badge */}
@@ -56,21 +93,27 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             </span>
           </div>
 
-          {/* Favorite Toggle Button - hidden until login is added */}
-          {false && onToggleSave && (
+          {/* Top Right Actions: Minimized Share Option */}
+          <div className="pointer-events-auto relative">
             <button
-              id={`fav-btn-${property.id}`}
-              onClick={(e) => onToggleSave(property.id, e)}
-              className="pointer-events-auto p-2 rounded-full bg-white/90 backdrop-blur-md text-[#171717] hover:text-red-500 hover:bg-white transition-colors duration-200 shadow-sm"
-              aria-label={isSaved ? 'Remove from saved' : 'Save property'}
+              id={`share-btn-${property.id}`}
+              onClick={handleShare}
+              className="p-2 rounded-full bg-white/90 backdrop-blur-md text-[#171717] hover:bg-[#171717] hover:text-white transition-all duration-200 shadow-sm cursor-pointer"
+              title="Share minimized link"
+              aria-label="Share property link"
             >
-              <Heart
-                className={`w-4 h-4 transition-all duration-200 ${
-                  isSaved ? 'fill-red-500 text-red-500 scale-110' : 'stroke-[2]'
-                }`}
-              />
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+              ) : (
+                <Share2 className="w-3.5 h-3.5 stroke-[2]" />
+              )}
             </button>
-          )}
+            {copied && (
+              <span className="absolute -bottom-7 right-0 text-[10px] font-bold bg-[#171717] text-white px-2 py-0.5 rounded shadow whitespace-nowrap z-20 animate-in fade-in duration-150">
+                Short link copied!
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Bottom Left Verified Pill */}
@@ -142,6 +185,35 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             <ArrowUpRight className="w-4 h-4" />
           </span>
         </div>
+
+        {/* Agent Card Row on Listing Card: Picture, Name, Designation & Listings Held */}
+        {property.agent && (
+          <div className="mt-3.5 pt-3 border-t border-[#F0F0EE] flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <img
+                src={property.agent.photo}
+                alt={property.agent.name}
+                referrerPolicy="no-referrer"
+                draggable={false}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(property.agent?.name || 'SQFT Advisor')}&background=CF9F5D&color=fff&size=100`;
+                }}
+                className="w-8 h-8 rounded-full object-cover object-top border border-[#CF9F5D] flex-shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-[#171717] truncate leading-tight">
+                  {property.agent.name}
+                </p>
+                <p className="text-[10px] text-[#6F6F6F] truncate leading-tight">
+                  {property.agent.title}
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold text-[#CF9F5D] bg-[#CF9F5D]/10 px-2.5 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap border border-[#CF9F5D]/20">
+              {agentListingCount || property.agent.propertyCount || 1} {(agentListingCount || property.agent.propertyCount || 1) === 1 ? 'Listing' : 'Listings'}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

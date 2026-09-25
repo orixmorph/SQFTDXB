@@ -130,6 +130,33 @@ export default function App() {
     }
   }, [savedPropertyIds]);
 
+  // Security: Prevent right-click and dragging on all images so they cannot be downloaded or copied
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'IMG' || target.closest('.secure-image-container') || target.closest('[data-secure-image]'))) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    const handleDragStart = (e: DragEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'IMG' || target.closest('.secure-image-container') || target.closest('[data-secure-image]'))) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('dragstart', handleDragStart);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('dragstart', handleDragStart);
+    };
+  }, []);
+
   const handleSelectProperty = (prop: Property) => {
     setSelectedProperty(prop);
     // Asynchronously retrieve full property record if updated
@@ -231,16 +258,16 @@ export default function App() {
               areas={dynamicAreas}
             />
 
-            {/* SECTION 02 — SELL OR RENT YOUR PROPERTY CTA BANNER */}
-            <SellRentCtaBanner
-              onOpenListProperty={handleOpenListProperty}
-            />
-
-            {/* SECTION 03 — TRENDING AREAS IN DUBAI BENTO GRID */}
+            {/* SECTION 02 — TRENDING AREAS IN DUBAI BENTO GRID */}
             <TrendingAreas
               onSelectArea={handleSelectArea}
               onViewAllAreas={() => navigateTo('areas')}
               areas={dynamicAreas}
+            />
+
+            {/* SECTION 03 — SELL OR RENT YOUR PROPERTY CTA BANNER */}
+            <SellRentCtaBanner
+              onOpenListProperty={handleOpenListProperty}
             />
 
             {/* SECTION 04 — HOT LISTINGS OF THE WEEK CAROUSEL */}
@@ -316,6 +343,8 @@ export default function App() {
       {/* Property Detail Modal */}
       <PropertyDetailModal
         property={selectedProperty}
+        allProperties={propertiesList}
+        onSelectProperty={handleSelectProperty}
         onClose={() => setSelectedProperty(null)}
         isSaved={selectedProperty ? savedPropertyIds.includes(selectedProperty.id) : false}
         onToggleSave={handleToggleSaveProperty}

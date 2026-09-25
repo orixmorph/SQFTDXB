@@ -7,7 +7,10 @@ interface FooterProps {
   onOpenListProperty: (purpose?: PropertyPurpose) => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenListProperty }) => {
+export const Footer: React.FC<FooterProps> = ({
+  onNavigate,
+  onOpenListProperty,
+}) => {
   return (
     <footer className="w-full bg-black border-t border-[#222222] text-white pt-14 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

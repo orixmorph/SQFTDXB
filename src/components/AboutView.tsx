@@ -111,7 +111,10 @@ export const AboutView: React.FC<AboutViewProps> = ({
                       src={agent.photo}
                       alt={agent.name}
                       referrerPolicy="no-referrer"
-                      className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-2 border-[#CF9F5D] transition-transform duration-300 group-hover:scale-105"
+                      className="w-24 h-24 rounded-full object-cover object-top mx-auto mb-4 border-2 border-[#CF9F5D] shadow-sm transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.name || 'Advisor')}&background=CF9F5D&color=fff&size=200`;
+                      }}
                     />
                     <h3 className="text-lg font-bold text-[#171717]">{agent.name}</h3>
                     <p className="text-xs text-[#6F6F6F] font-medium mt-0.5">{agent.title}</p>

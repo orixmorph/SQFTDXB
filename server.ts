@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getLiveProperties, getPropertyById, getLiveAgents, getLiveAreas } from './src/server/baserow';
+import { forwardLeadToGoogleSheets } from './src/server/leadProxy';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -108,6 +109,39 @@ app.get('/api/properties/:id', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve property details.',
+    });
+  }
+});
+
+/**
+ * Minimized short link redirect: /p/:id or /share/:id
+ * Redirects short shareable links directly to the property view.
+ */
+app.get(['/p/:id', '/share/:id'], (req, res) => {
+  const propertyId = req.params.id;
+  res.redirect(`/?property=${encodeURIComponent(propertyId)}`);
+});
+
+/**
+ * POST /api/submit-lead
+ * Confidential server-side lead ingestion.
+ * Dispatches inquiries to the Google Apps Script Web App without exposing
+ * endpoints, IDs, or tokens to the browser DevTools or Network inspector.
+ */
+app.post('/api/submit-lead', async (req, res) => {
+  try {
+    const lead = req.body || {};
+    const result = await forwardLeadToGoogleSheets(lead);
+    res.json({
+      success: true,
+      message: result.message || 'Inquiry received successfully.',
+      timestamp: result.timestamp,
+    });
+  } catch (error: any) {
+    console.error('[API /api/submit-lead] Ingestion error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process inquiry.',
     });
   }
 });
