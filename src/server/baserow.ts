@@ -22,21 +22,21 @@ const CACHE_TTL_MS = 30 * 1000; // 30 seconds TTL for fast updates
 // Helper to safely extract single string or text from Baserow cell
 function extractText(val: unknown): string {
   if (val === null || val === undefined) return '';
-  if (typeof val === 'string') return val.trim();
+  if (typeof val === 'string') return val.replace(/\u00A0/g, ' ').trim();
   if (typeof val === 'number') return String(val);
   if (Array.isArray(val) && val.length > 0) {
     const first = val[0];
     if (typeof first === 'object' && first !== null) {
-      return (first.value || first.name || '').trim();
+      return (first.value || first.name || '').replace(/\u00A0/g, ' ').trim();
     }
-    return String(first).trim();
+    return String(first).replace(/\u00A0/g, ' ').trim();
   }
   if (typeof val === 'object' && val !== null) {
     if ('value' in val && typeof (val as any).value === 'string') {
-      return (val as any).value.trim();
+      return (val as any).value.replace(/\u00A0/g, ' ').trim();
     }
     if ('name' in val && typeof (val as any).name === 'string') {
-      return (val as any).name.trim();
+      return (val as any).name.replace(/\u00A0/g, ' ').trim();
     }
   }
   return '';
@@ -569,6 +569,8 @@ export function mapBaserowRowToProperty(
     readyStatus: 'Ready to Move',
     handoverYear: 'Completed & Ready',
     description,
+    shortDescription: shortDesc || undefined,
+    fullDescription: fullDesc || undefined,
     features: highlights,
     amenities: amenities.length > 0 ? amenities : defaultAmenities,
     floor: floorDisplay,

@@ -19,7 +19,6 @@ import {
   Sparkles,
   Compass,
   FileText,
-  Clock,
   Building2,
   Loader2,
   Copy,
@@ -36,6 +35,100 @@ interface PropertyDetailModalProps {
   onToggleSave?: (propertyId: string, e: React.MouseEvent) => void;
   allProperties?: Property[];
   onSelectProperty?: (property: Property) => void;
+}
+
+/**
+ * Renders structured markdown, bullet points, and paragraphs cleanly
+ */
+function FormattedDescription({ content }: { content: string }) {
+  if (!content) return null;
+
+  const cleanContent = content.replace(/&amp;/g, '&').replace(/\\_/g, '_');
+  const lines = cleanContent.split('\n');
+  const sections: { title?: string; items: string[]; type: 'list' | 'paragraph' }[] = [];
+
+  let currentTitle: string | undefined;
+  let currentItems: string[] = [];
+  let currentType: 'list' | 'paragraph' = 'paragraph';
+
+  const flush = () => {
+    if (currentItems.length > 0) {
+      sections.push({
+        title: currentTitle,
+        items: currentItems,
+        type: currentType,
+      });
+      currentItems = [];
+      currentTitle = undefined;
+      currentType = 'paragraph';
+    }
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    const isHeader =
+      /^(Property Details|Community Amenities|Location Highlights|Property Features|Key Features|Amenities|Overview|Highlights|Key Points)[:*]*$/i.test(line) ||
+      (/^\*\*.*\*\*$/.test(line) && line.length < 55) ||
+      (line.endsWith(':') && line.length < 40 && !line.startsWith('-') && !line.startsWith('•'));
+
+    if (isHeader) {
+      flush();
+      currentTitle = line.replace(/[*#:]/g, '').trim();
+      currentType = 'list';
+      continue;
+    }
+
+    const isBullet = /^[-•*]\s+/.test(line);
+    if (isBullet) {
+      const cleanBullet = line.replace(/^[-•*]\s+/, '').trim();
+      if (currentType !== 'list') {
+        flush();
+        currentType = 'list';
+      }
+      currentItems.push(cleanBullet);
+    } else {
+      if (currentType === 'list' && currentItems.length > 0 && !currentTitle) {
+        flush();
+      }
+      currentItems.push(line);
+    }
+  }
+  flush();
+
+  return (
+    <div className="space-y-4 text-sm leading-relaxed text-[#383838]">
+      {sections.map((sec, idx) => (
+        <div key={idx} className="space-y-2.5">
+          {sec.title && (
+            <h4 className="text-sm font-bold text-[#171717] tracking-tight flex items-center gap-2 pt-2 border-t border-[#F0F0EE] first:border-t-0 first:pt-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#CF9F5D]" />
+              <span>{sec.title}</span>
+            </h4>
+          )}
+          {sec.type === 'list' ? (
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              {sec.items.map((item, iIdx) => (
+                <li key={iIdx} className="flex items-start gap-2 bg-[#F9F9F8] p-2.5 rounded-xl border border-[#EFEFEA]">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#CF9F5D] flex-shrink-0 mt-0.5" />
+                  <span className="text-[#2C2C2C] font-medium leading-snug">{item}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="space-y-2">
+              {sec.items.map((p, pIdx) => (
+                <p key={pIdx} className="text-sm text-[#4A4A4A] leading-relaxed">
+                  {p}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
@@ -276,7 +369,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div
         id="property-detail-modal"
-        className="relative w-full max-w-5xl bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[94vh] flex flex-col"
+        className="relative w-full max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1540px] bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[95vh] flex flex-col"
       >
         {/* Sticky Header Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#EAEAEA] bg-white sticky top-0 z-30">
@@ -396,105 +489,109 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
         </div>
 
         {/* Scrollable Modal Content */}
-        <div id="property-detail-modal-body" className="overflow-y-auto p-6 md:p-8 space-y-8 flex-1">
-          {/* Image Gallery with Anti-Download Protection */}
-          <div className="space-y-3">
-            <div
-              className="relative aspect-[16/9] sm:aspect-[21/9] w-full rounded-2xl overflow-hidden bg-[#F7F7F5] secure-image-container select-none"
-              onContextMenu={(e) => e.preventDefault()}
-              onDragStart={(e) => e.preventDefault()}
-            >
-              <img
-                src={propertyImages[activeImageIndex] || propertyImages[0]}
-                alt={property.title || 'Property View'}
-                referrerPolicy="no-referrer"
-                draggable={false}
+        <div id="property-detail-modal-body" className="overflow-y-auto p-4 sm:p-6 md:p-8 space-y-8 flex-1">
+          {/* Top Section: Split Hero on Desktop, Stacked on Mobile */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start pb-8 border-b border-[#F0F0EE]">
+            {/* Left: Gallery Showcase (lg:col-span-7) */}
+            <div className="lg:col-span-7 space-y-3">
+              <div
+                className="relative aspect-[16/10] sm:aspect-[16/10] w-full rounded-2xl overflow-hidden bg-[#F7F7F5] secure-image-container select-none shadow-xs"
                 onContextMenu={(e) => e.preventDefault()}
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85';
-                }}
-                className="secure-image w-full h-full object-cover transition-all duration-300 select-none pointer-events-none"
-              />
-
-              {/* Centered 35% Opacity Pure White Watermark Protection (No Text) */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10">
+                onDragStart={(e) => e.preventDefault()}
+              >
                 <img
-                  src="https://res.cloudinary.com/dy6km7beb/image/upload/c_crop,w_450,h_450,x_25,y_103/v1789980615/Untitled_design_11_ocowpa.png"
-                  alt="SQFT DXB Watermark"
-                  draggable={false}
-                  className="w-28 sm:w-36 md:w-44 h-auto object-contain opacity-35 select-none pointer-events-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)] filter brightness-0 invert"
+                  src={propertyImages[activeImageIndex] || propertyImages[0]}
+                  alt={property.title || 'Property View'}
                   referrerPolicy="no-referrer"
+                  draggable={false}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85';
+                  }}
+                  className="secure-image w-full h-full object-cover transition-all duration-300 select-none pointer-events-none"
                 />
+
+                {/* Centered 35% Opacity Pure White Watermark Protection (No Text) */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10">
+                  <img
+                    src="https://res.cloudinary.com/dy6km7beb/image/upload/c_crop,w_450,h_450,x_25,y_103/v1789980615/Untitled_design_11_ocowpa.png"
+                    alt="SQFT DXB Watermark"
+                    draggable={false}
+                    className="w-24 sm:w-32 md:w-36 h-auto object-contain opacity-35 select-none pointer-events-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)] filter brightness-0 invert"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+
+                {/* Transparent Click-Protection Overlay to Prevent Image Saving */}
+                <div
+                  className="absolute inset-0 z-[6] select-none pointer-events-none"
+                  onContextMenu={(e) => e.preventDefault()}
+                />
+
+                {/* Gallery Controls */}
+                {propertyImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/85 backdrop-blur-md text-[#171717] hover:bg-white shadow-md transition-all cursor-pointer z-20"
+                      aria-label="Previous photo"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/85 backdrop-blur-md text-[#171717] hover:bg-white shadow-md transition-all cursor-pointer z-20"
+                      aria-label="Next photo"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                    <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-xs font-medium z-20">
+                      {activeImageIndex + 1} / {propertyImages.length}
+                    </div>
+                  </>
+                )}
               </div>
 
-              {/* Transparent Click-Protection Overlay to Prevent Image Saving */}
-              <div
-                className="absolute inset-0 z-[6] select-none pointer-events-none"
-                onContextMenu={(e) => e.preventDefault()}
-              />
-
-              {/* Gallery Controls */}
+              {/* Thumbnail Strip */}
               {propertyImages.length > 1 && (
-                <>
-                  <button
-                    onClick={prevImage}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/85 backdrop-blur-md text-[#171717] hover:bg-white shadow-md transition-all cursor-pointer z-20"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={nextImage}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/85 backdrop-blur-md text-[#171717] hover:bg-white shadow-md transition-all cursor-pointer z-20"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                  <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-xs font-medium z-20">
-                    {activeImageIndex + 1} / {propertyImages.length}
-                  </div>
-                </>
+                <div
+                  className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar select-none"
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  {propertyImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`relative flex-shrink-0 w-16 sm:w-20 aspect-[16/10] rounded-xl overflow-hidden border-2 transition-all cursor-pointer select-none ${
+                        activeImageIndex === idx
+                          ? 'border-[#CF9F5D] scale-102 shadow-sm'
+                          : 'border-transparent opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <img
+                        src={img}
+                        alt="thumbnail"
+                        referrerPolicy="no-referrer"
+                        draggable={false}
+                        onContextMenu={(e) => e.preventDefault()}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src =
+                            'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85';
+                        }}
+                        className="secure-image w-full h-full object-cover select-none pointer-events-none"
+                      />
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
 
-            {/* Thumbnail Strip */}
-            {propertyImages.length > 1 && (
-              <div
-                className="flex gap-3 overflow-x-auto pb-1 no-scrollbar select-none"
-                onContextMenu={(e) => e.preventDefault()}
-              >
-                {propertyImages.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`relative flex-shrink-0 w-20 sm:w-24 aspect-[16/10] rounded-xl overflow-hidden border-2 transition-all cursor-pointer select-none ${
-                      activeImageIndex === idx
-                        ? 'border-[#CF9F5D] scale-102 shadow-sm'
-                        : 'border-transparent opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt="thumbnail"
-                      referrerPolicy="no-referrer"
-                      draggable={false}
-                      onContextMenu={(e) => e.preventDefault()}
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src =
-                          'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85';
-                      }}
-                      className="secure-image w-full h-full object-cover select-none pointer-events-none"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Core Price & Title Block */}
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-[#F0F0EE]">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#171717] tracking-wide">
+            {/* Right: Key Info & Short Description (lg:col-span-5) */}
+            <div className="lg:col-span-5 flex flex-col justify-start space-y-4">
+              {/* Location & Map Jump */}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#171717] tracking-wide">
                   <MapPin className="w-3.5 h-3.5 text-[#CF9F5D] flex-shrink-0" />
                   <span>{property.projectName ? `${property.projectName}, ` : ''}{property.area}, Dubai</span>
                 </span>
@@ -510,115 +607,172 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                       setTimeout(() => el.classList.remove('ring-2', 'ring-[#CF9F5D]/60', 'ring-offset-2'), 2500);
                     }
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 hover:bg-[#CF9F5D]/10 text-stone-600 hover:text-[#171717] border border-stone-200 hover:border-[#CF9F5D]/40 text-xs font-medium transition-all duration-200 cursor-pointer shadow-2xs group"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-stone-100 hover:bg-[#CF9F5D]/10 text-stone-600 hover:text-[#171717] border border-stone-200 hover:border-[#CF9F5D]/40 text-xs font-medium transition-all cursor-pointer shadow-2xs group"
                   title="Scroll to view property map & neighborhood"
                 >
-                  <MapPin className="w-3 h-3 text-[#CF9F5D] group-hover:scale-110 transition-transform" />
-                  <span>View on Map ↓</span>
+                  <MapPin className="w-3.5 h-3.5 text-[#CF9F5D] group-hover:scale-110 transition-transform" />
+                  <span>Map Pin ↓</span>
                 </button>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#171717] tracking-tight leading-snug">
+
+              {/* Title */}
+              <h1 className="text-xl sm:text-2xl font-extrabold text-[#171717] tracking-tight leading-snug">
                 {property.title}
               </h1>
-              <div className="flex items-center gap-2 text-xs text-[#8A8A8A]">
-                <span>RERA Permit: {property.reraPermit}</span>
-                <span>•</span>
-                <span>{property.handoverYear}</span>
-              </div>
-            </div>
 
-            <div className="md:text-right flex-shrink-0 bg-[#F7F7F5] p-4 rounded-2xl md:bg-transparent md:p-0">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#8A8A8A] block mb-1">
-                {property.purpose === 'buy' ? 'Asking Price' : 'Annual Rent'}
-              </span>
-              <div className="flex items-baseline md:justify-end gap-1.5">
-                <span className="text-2xl sm:text-3xl font-extrabold text-[#171717]">
-                  {property.priceDisplay}
-                </span>
-                {property.priceUnit && (
-                  <span className="text-sm font-medium text-[#6F6F6F]">
-                    {property.priceUnit}
+              {/* Price & Reference Row */}
+              <div className="flex items-baseline justify-between gap-2 pb-2 border-b border-[#F0F0EE]">
+                <div className="flex items-baseline gap-1.5 flex-wrap">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-[#171717]">
+                    {property.priceDisplay}
                   </span>
-                )}
+                  {property.priceUnit && (
+                    <span className="text-xs font-medium text-[#6F6F6F]">
+                      {property.priceUnit}
+                    </span>
+                  )}
+                  {property.pricePerSqft && (
+                    <span className="text-xs text-[#8A8A8A] font-medium ml-1.5">
+                      • AED {property.pricePerSqft.toLocaleString()}/sq.ft
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs text-[#8A8A8A] font-mono">
+                  {property.referenceNumber ? `Ref: ${property.referenceNumber}` : ''}
+                </span>
               </div>
-              {property.pricePerSqft && (
-                <p className="text-xs text-[#8A8A8A] mt-0.5">
-                  AED {property.pricePerSqft.toLocaleString()} per sq.ft
-                </p>
+
+              {/* Description (Underneath Title as requested) */}
+              {(property.shortDescription || property.description) && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#FBF9F5] border border-[#CF9F5D]/30 space-y-2 shadow-2xs flex-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#CF9F5D]">
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Description</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#2C2C2C] leading-relaxed whitespace-pre-line">
+                    {property.shortDescription || property.description.split('\n\n')[0]}
+                  </p>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Quick Specifications Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#EAEAEA] text-center">
-              <Bed className="w-4 h-4 text-[#CF9F5D] mx-auto mb-1" />
-              <span className="text-[11px] text-[#8A8A8A] uppercase font-semibold block">
-                Bedrooms
-              </span>
-              <span className="text-sm font-bold text-[#171717]">
-                {displayBedrooms}
-              </span>
-            </div>
+          {/* Main Content Grid: 70% Left (Specs, Amenities, Overview, Building Specs, Map) vs 30% Right (Agent Card) */}
+          <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 lg:gap-8 pt-2">
+            {/* Left 70% (lg:col-span-7): Specs, Amenities, Overview, Building Specs, Map */}
+            <div className="lg:col-span-7 space-y-5">
+              {/* Key Specifications (Icon on Top, Full Visibility without Truncation) */}
+              <div className="rounded-2xl bg-[#F7F7F5] border border-[#EAEAEA] p-3 sm:p-4 shadow-2xs">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 sm:gap-3">
+                  {/* Bedrooms */}
+                  <div className="bg-white rounded-xl p-3 border border-[#EAEAEA] flex flex-col items-center text-center justify-between shadow-2xs hover:border-[#CF9F5D]/40 transition-colors min-h-[84px]">
+                    <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#CF9F5D]/25 flex items-center justify-center mb-1.5 flex-shrink-0">
+                      <Bed className="w-4 h-4 text-[#CF9F5D]" />
+                    </div>
+                    <span className="text-[10px] text-[#8A8A8A] uppercase font-bold tracking-wider mb-1">
+                      Bedrooms
+                    </span>
+                    <span className="text-xs sm:text-sm font-extrabold text-[#171717] leading-snug break-words">
+                      {displayBedrooms}
+                    </span>
+                  </div>
 
-            <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#EAEAEA] text-center">
-              <Bath className="w-4 h-4 text-[#CF9F5D] mx-auto mb-1" />
-              <span className="text-[11px] text-[#8A8A8A] uppercase font-semibold block">
-                Bathrooms
-              </span>
-              <span className="text-sm font-bold text-[#171717]">
-                {displayBathrooms}
-              </span>
-            </div>
+                  {/* Bathrooms */}
+                  <div className="bg-white rounded-xl p-3 border border-[#EAEAEA] flex flex-col items-center text-center justify-between shadow-2xs hover:border-[#CF9F5D]/40 transition-colors min-h-[84px]">
+                    <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#CF9F5D]/25 flex items-center justify-center mb-1.5 flex-shrink-0">
+                      <Bath className="w-4 h-4 text-[#CF9F5D]" />
+                    </div>
+                    <span className="text-[10px] text-[#8A8A8A] uppercase font-bold tracking-wider mb-1">
+                      Bathrooms
+                    </span>
+                    <span className="text-xs sm:text-sm font-extrabold text-[#171717] leading-snug break-words">
+                      {displayBathrooms}
+                    </span>
+                  </div>
 
-            <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#EAEAEA] text-center">
-              <Maximize2 className="w-4 h-4 text-[#CF9F5D] mx-auto mb-1" />
-              <span className="text-[11px] text-[#8A8A8A] uppercase font-semibold block">
-                Total Area
-              </span>
-              <span className="text-sm font-bold text-[#171717]">
-                {displayTotalArea}
-              </span>
-            </div>
+                  {/* Area Sq.Ft */}
+                  <div className="bg-white rounded-xl p-3 border border-[#EAEAEA] flex flex-col items-center text-center justify-between shadow-2xs hover:border-[#CF9F5D]/40 transition-colors min-h-[84px]">
+                    <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#CF9F5D]/25 flex items-center justify-center mb-1.5 flex-shrink-0">
+                      <Maximize2 className="w-4 h-4 text-[#CF9F5D]" />
+                    </div>
+                    <span className="text-[10px] text-[#8A8A8A] uppercase font-bold tracking-wider mb-1">
+                      Area
+                    </span>
+                    <span className="text-xs sm:text-sm font-extrabold text-[#171717] leading-snug break-words">
+                      {displayTotalArea}
+                    </span>
+                  </div>
 
-            <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#EAEAEA] text-center">
-              <Car className="w-4 h-4 text-[#CF9F5D] mx-auto mb-1" />
-              <span className="text-[11px] text-[#8A8A8A] uppercase font-semibold block">
-                Parking
-              </span>
-              <span className="text-sm font-bold text-[#171717]">
-                {displayParking}
-              </span>
-            </div>
+                  {/* Parking */}
+                  <div className="bg-white rounded-xl p-3 border border-[#EAEAEA] flex flex-col items-center text-center justify-between shadow-2xs hover:border-[#CF9F5D]/40 transition-colors min-h-[84px]">
+                    <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#CF9F5D]/25 flex items-center justify-center mb-1.5 flex-shrink-0">
+                      <Car className="w-4 h-4 text-[#CF9F5D]" />
+                    </div>
+                    <span className="text-[10px] text-[#8A8A8A] uppercase font-bold tracking-wider mb-1">
+                      Parking
+                    </span>
+                    <span className="text-xs sm:text-sm font-extrabold text-[#171717] leading-snug break-words">
+                      {displayParking}
+                    </span>
+                  </div>
 
-            <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#EAEAEA] text-center">
-              <Layers className="w-4 h-4 text-[#CF9F5D] mx-auto mb-1" />
-              <span className="text-[11px] text-[#8A8A8A] uppercase font-semibold block">
-                Furnishing
-              </span>
-              <span className="text-sm font-bold text-[#171717]">
-                {displayFurniture}
-              </span>
-            </div>
+                  {/* Furnishing */}
+                  <div className="bg-white rounded-xl p-3 border border-[#EAEAEA] flex flex-col items-center text-center justify-between shadow-2xs hover:border-[#CF9F5D]/40 transition-colors min-h-[84px]">
+                    <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#CF9F5D]/25 flex items-center justify-center mb-1.5 flex-shrink-0">
+                      <Layers className="w-4 h-4 text-[#CF9F5D]" />
+                    </div>
+                    <span className="text-[10px] text-[#8A8A8A] uppercase font-bold tracking-wider mb-1">
+                      Furnishing
+                    </span>
+                    <span className="text-xs sm:text-sm font-extrabold text-[#171717] leading-snug break-words">
+                      {displayFurniture}
+                    </span>
+                  </div>
 
-            <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#EAEAEA] text-center">
-              <Compass className="w-4 h-4 text-[#CF9F5D] mx-auto mb-1" />
-              <span className="text-[11px] text-[#8A8A8A] uppercase font-semibold block">
-                Exposure
-              </span>
-              <span className="text-sm font-bold text-[#171717] truncate block">
-                {displayExposure}
-              </span>
-            </div>
-          </div>
+                  {/* View */}
+                  <div className="bg-white rounded-xl p-3 border border-[#EAEAEA] flex flex-col items-center text-center justify-between shadow-2xs hover:border-[#CF9F5D]/40 transition-colors min-h-[84px]">
+                    <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] border border-[#CF9F5D]/25 flex items-center justify-center mb-1.5 flex-shrink-0">
+                      <Compass className="w-4 h-4 text-[#CF9F5D]" />
+                    </div>
+                    <span className="text-[10px] text-[#8A8A8A] uppercase font-bold tracking-wider mb-1">
+                      View
+                    </span>
+                    <span className="text-xs sm:text-sm font-extrabold text-[#171717] leading-snug break-words" title={displayExposure}>
+                      {displayExposure}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-          {/* Main Content Grid: Description & Secondary Features vs Advisor Sidebar */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left 2 Cols: Details, Features, Amenities */}
-            <div className="lg:col-span-2 space-y-6">
+              {/* Property & Community Amenities (Left Side, 70% Width) */}
+              {validAmenities.length > 0 && (
+                <div id="all-amenities-section" className="p-4 rounded-2xl bg-white border border-[#EAEAEA] shadow-2xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#8A8A8A] flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#CF9F5D]" />
+                      <span>Property & Community Amenities</span>
+                    </h4>
+                    <span className="text-[11px] font-semibold text-[#8A8A8A]">
+                      {validAmenities.length} Verified Features
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {validAmenities.map((amenity, i) => (
+                      <span
+                        key={i}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F7F7F5] hover:bg-[#F2EFE9] border border-[#EAEAEA] text-xs font-medium text-[#171717] transition-colors"
+                      >
+                        <CheckCircle2 className="w-3 h-3 text-[#CF9F5D] flex-shrink-0" />
+                        <span>{amenity}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Secondary Market Guarantee Box */}
               <div className="p-4 rounded-2xl bg-[#FBF9F5] border border-[#CF9F5D]/30 flex items-start gap-3.5">
-                <ShieldCheck className="w-6 h-6 text-[#CF9F5D] flex-shrink-0 mt-0.5" />
+                <ShieldCheck className="w-5 h-5 text-[#CF9F5D] flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-sm font-bold text-[#171717]">
                     SQFT DXB Secondary Verification Guarantee
@@ -629,20 +783,30 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Description */}
-              <div>
-                <h3 className="text-lg font-bold text-[#171717] mb-3">
-                  Property Overview
-                </h3>
-                <p className="text-sm text-[#4A4A4A] leading-relaxed whitespace-pre-line">
-                  {property.description}
-                </p>
+              {/* Full Description & Overview */}
+              <div id="full-overview-section" className="space-y-3 pt-1">
+                <div className="flex items-center justify-between pb-1 border-b border-[#F0F0EE]">
+                  <h3 className="text-base sm:text-lg font-bold text-[#171717]">
+                    Detailed Property Overview
+                  </h3>
+                  <span className="text-xs text-[#8A8A8A] font-medium">
+                    Verified Secondary Market
+                  </span>
+                </div>
+                <FormattedDescription
+                  content={
+                    property.fullDescription ||
+                    property.description ||
+                    property.shortDescription ||
+                    ''
+                  }
+                />
               </div>
 
               {/* Key Features */}
               {property.features && property.features.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-bold text-[#171717] mb-3">
+                <div className="space-y-3">
+                  <h3 className="text-lg font-bold text-[#171717]">
                     Key Secondary Highlights
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -766,35 +930,14 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   )}
                 </div>
               </div>
-
-              {/* Amenities */}
-              {validAmenities.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-bold text-[#171717] mb-3">
-                    Building & Community Amenities
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {validAmenities.map((amenity, idx) => (
-                      <span
-                        key={idx}
-                        className="px-3 py-1.5 rounded-lg bg-white border border-[#EAEAEA] text-xs font-medium text-[#4A4A4A] inline-flex items-center gap-1.5"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#CF9F5D]" />
-                        <span>{amenity}</span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Map & Neighborhood Pin Section */}
               <div id="property-map-section" className="pt-2">
                 <PropertyMapSection property={property} />
               </div>
             </div>
 
-            {/* Right 1 Col: Assigned Agent & Viewing Request Card */}
-            <div className="space-y-6">
+            {/* Right 30% (lg:col-span-3): Assigned Agent & Viewing Request Card (Sticky on scroll) */}
+            <div id="viewing-booking-section" className="lg:col-span-3 space-y-6 lg:sticky lg:top-6 self-start">
               {/* Assigned Agent Box */}
               <div className="p-5 rounded-2xl bg-[#F7F7F5] border border-[#EAEAEA] space-y-4">
                 <div className="flex items-center gap-3.5">
@@ -867,16 +1010,6 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Ready Buyer Advisory Tip */}
-              <div className="p-4 rounded-xl border border-[#EAEAEA] bg-white text-xs text-[#6F6F6F] space-y-1.5">
-                <div className="flex items-center gap-1.5 font-bold text-[#171717]">
-                  <Clock className="w-3.5 h-3.5 text-[#CF9F5D]" />
-                  <span>Immediate Viewing Availability</span>
-                </div>
-                <p>
-                  As a ready property, physical viewings can be arranged within 2-4 hours with keys held in escrow or directly through our senior advisor.
-                </p>
-              </div>
 
               {/* Properties Represented by this Advisor (2, 3, or whatever properties they have) */}
               {agentProperties.length > 0 && (

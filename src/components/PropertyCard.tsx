@@ -155,9 +155,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           </div>
 
           {/* Title */}
-          <h3 className="text-base font-semibold text-[#171717] leading-snug line-clamp-1 mb-4 group-hover:text-[#CF9F5D] transition-colors duration-200">
+          <h3 className="text-base font-semibold text-[#171717] leading-snug line-clamp-1 mb-1.5 group-hover:text-[#CF9F5D] transition-colors duration-200">
             {property.title}
           </h3>
+
+          {/* Short Description Snippet */}
+          {(property.shortDescription || property.description) && (
+            <p className="text-xs text-[#6F6F6F] line-clamp-2 leading-relaxed mb-3">
+              {property.shortDescription || property.description.split('\n\n')[0]}
+            </p>
+          )}
         </div>
 
         {/* Specs & Quick Action Footer */}

@@ -21,18 +21,18 @@ const CACHE_TTL_MS = 25 * 1000; // 25 seconds cache
 
 function extractText(val: unknown): string {
   if (val === null || val === undefined) return '';
-  if (typeof val === 'string') return val.trim();
+  if (typeof val === 'string') return val.replace(/\u00A0/g, ' ').trim();
   if (typeof val === 'number') return String(val);
   if (Array.isArray(val) && val.length > 0) {
     const first = val[0];
     if (typeof first === 'object' && first !== null) {
-      return ((first as any).value || (first as any).name || (first as any).title || '').trim();
+      return ((first as any).value || (first as any).name || (first as any).title || '').replace(/\u00A0/g, ' ').trim();
     }
-    return String(first).trim();
+    return String(first).replace(/\u00A0/g, ' ').trim();
   }
   if (typeof val === 'object' && val !== null) {
-    if ('value' in val && typeof (val as any).value === 'string') return (val as any).value.trim();
-    if ('name' in val && typeof (val as any).name === 'string') return (val as any).name.trim();
+    if ('value' in val && typeof (val as any).value === 'string') return (val as any).value.replace(/\u00A0/g, ' ').trim();
+    if ('name' in val && typeof (val as any).name === 'string') return (val as any).name.replace(/\u00A0/g, ' ').trim();
   }
   return '';
 }
@@ -356,6 +356,8 @@ function mapBaserowRowToProperty(
     readyStatus: 'Ready to Move',
     handoverYear: 'Completed & Ready',
     description,
+    shortDescription: shortDesc || undefined,
+    fullDescription: fullDesc || undefined,
     features: [
       'Title Deed Verified with Dubai Land Department',
       'Delivered Vacant on Transfer / Ready',

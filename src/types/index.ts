@@ -42,8 +42,10 @@ export interface Property {
   isVerified: boolean;
   isReady: boolean;
   readyStatus: 'Ready to Move' | 'Vacant on Transfer' | 'Tenanted (High ROI)';
-  handoverYear: string;
+  handoverYear?: string;
   description: string;
+  shortDescription?: string;
+  fullDescription?: string;
   features: string[];
   amenities: string[];
   floor?: string;

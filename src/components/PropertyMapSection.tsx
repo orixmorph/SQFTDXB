@@ -3,10 +3,6 @@ import {
   MapPin,
   Navigation,
   ExternalLink,
-  Copy,
-  Check,
-  Compass,
-  AlertCircle,
 } from 'lucide-react';
 import { Property } from '../types';
 
@@ -15,7 +11,6 @@ interface PropertyMapSectionProps {
 }
 
 export const PropertyMapSection: React.FC<PropertyMapSectionProps> = ({ property }) => {
-  const [copied, setCopied] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(15);
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
 
@@ -40,17 +35,6 @@ export const PropertyMapSection: React.FC<PropertyMapSectionProps> = ({ property
     parseCoord(property.location?.lng);
 
   const hasCoordinates = lat !== null && lng !== null;
-
-  const formattedCoordinates = hasCoordinates
-    ? `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`
-    : null;
-
-  const handleCopyCoordinates = () => {
-    if (!hasCoordinates) return;
-    navigator.clipboard.writeText(`${lat}, ${lng}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const googleMapsSearchUrl = hasCoordinates
     ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
@@ -88,40 +72,15 @@ export const PropertyMapSection: React.FC<PropertyMapSectionProps> = ({ property
 
         {/* Compact Right-Side Actions */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          {hasCoordinates && formattedCoordinates ? (
-            <div className="flex items-center gap-1 bg-white border border-stone-200/80 rounded-lg px-2.5 py-1 shadow-2xs">
-              <Compass className="w-3 h-3 text-[#CF9F5D]" />
-              <span className="text-[11px] font-mono text-stone-600">
-                {formattedCoordinates}
-              </span>
-              <button
-                type="button"
-                onClick={handleCopyCoordinates}
-                title="Copy coordinates"
-                className="ml-1 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer p-0.5"
-              >
-                {copied ? (
-                  <Check className="w-3 h-3 text-emerald-600" />
-                ) : (
-                  <Copy className="w-3 h-3" />
-                )}
-              </button>
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-1 text-[11px] text-stone-500">
-              <AlertCircle className="w-3 h-3 text-[#CF9F5D]" />
-              <span>Location: {property.area}</span>
-            </div>
-          )}
-
           <a
             href={googleMapsSearchUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-stone-50 border border-stone-200/80 text-stone-700 hover:text-[#171717] text-[11px] font-medium transition-colors shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 border border-stone-200/80 text-stone-700 hover:text-[#171717] text-xs font-semibold transition-colors shadow-2xs"
             title="Open in Google Maps"
           >
-            <span>Google Maps</span>
+            <MapPin className="w-3.5 h-3.5 text-[#CF9F5D]" />
+            <span>Open in Google Maps</span>
             <ExternalLink className="w-3 h-3 text-stone-400" />
           </a>
         </div>
@@ -237,9 +196,7 @@ export const PropertyMapSection: React.FC<PropertyMapSectionProps> = ({ property
       {/* Discreet Footer Note */}
       <div className="flex items-center justify-between text-[11px] text-stone-400 pt-0.5 px-0.5">
         <span>
-          {hasCoordinates
-            ? 'Verified Dubai GPS coordinates'
-            : `Community: ${property.area}, Dubai`}
+          {property.projectName ? `${property.projectName}, ` : ''}{property.area}, Dubai
         </span>
         <a
           href={googleMapsDirectionsUrl}
