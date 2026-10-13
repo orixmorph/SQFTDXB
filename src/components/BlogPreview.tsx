@@ -5,16 +5,13 @@ import { BookOpen, Clock, ArrowRight, ArrowUpRight } from 'lucide-react';
 interface BlogPreviewProps {
   onViewAllBlog: () => void;
   onSelectPost: (post: BlogPost) => void;
-  posts?: BlogPost[];
 }
 
 export const BlogPreview: React.FC<BlogPreviewProps> = ({
   onViewAllBlog,
   onSelectPost,
-  posts,
 }) => {
-  const sourcePosts = posts && posts.length > 0 ? posts : blogPosts;
-  const featuredPosts = sourcePosts.slice(0, 3);
+  const featuredPosts = blogPosts.slice(0, 3);
 
   return (
     <section className="w-full py-16 md:py-24 bg-[#FAFAF9] border-b border-[#F0F0EE]">

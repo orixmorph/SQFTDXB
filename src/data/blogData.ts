@@ -14,9 +14,6 @@ export interface BlogPost {
   image: string;
   content: string[];
   tags: string[];
-  published?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export const blogPosts: BlogPost[] = [

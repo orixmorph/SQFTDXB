@@ -18,14 +18,12 @@ interface BlogViewProps {
   onNavigateToProperties: () => void;
   onOpenListProperty: () => void;
   initialPost?: BlogPost | null;
-  posts?: BlogPost[];
 }
 
 export const BlogView: React.FC<BlogViewProps> = ({
   onNavigateToProperties,
   onOpenListProperty,
   initialPost,
-  posts,
 }) => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(initialPost || null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -34,9 +32,7 @@ export const BlogView: React.FC<BlogViewProps> = ({
 
   const categories = ['All', 'Market Insights', 'Secondary Guide', 'Investment', 'Legal & DLD'];
 
-  const allPosts = posts && posts.length > 0 ? posts : blogPosts;
-
-  const filteredPosts = allPosts.filter((post) => {
+  const filteredPosts = blogPosts.filter((post) => {
     const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
     const matchesSearch =
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
