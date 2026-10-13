@@ -220,6 +220,27 @@ const AGENT_PROFILES: Record<string, { title: string; photo: string; phone: stri
     whatsapp: '971588648093',
     email: 'mousa@sqftdxb.com',
   },
+  'mousa': {
+    title: 'Commercial & Prime Properties Advisor',
+    photo: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80',
+    phone: '+971 58 864 8093',
+    whatsapp: '971588648093',
+    email: 'mousa@sqftdxb.com',
+  },
+  'mousa nazarov': {
+    title: 'Commercial & Prime Properties Advisor',
+    photo: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80',
+    phone: '+971 58 864 8093',
+    whatsapp: '971588648093',
+    email: 'mousa@sqftdxb.com',
+  },
+  'jona': {
+    title: 'Senior Secondary Market Specialist',
+    photo: 'https://baserow-backend-production20240528124524339000000001.s3.amazonaws.com/user_files/N1F2d3OdIpJ8naCHrk2iiqcKcype3IPY_7b41e4dce7018eba3541a816883eac26dc1b7524783589ce32afcb839137e065.jpg',
+    phone: '+971 58 864 8093',
+    whatsapp: '971588648093',
+    email: 'john@sqftdxb.com',
+  },
 };
 
 /**
@@ -280,12 +301,41 @@ export function mapBaserowRowToProperty(
     '';
 
   // 5. Community / Area & Emirate
-  const areaRaw =
+  let areaRaw =
     extractText(row['Community / Area']) ||
     extractText(row['Community/Area']) ||
     extractText(row['Community']) ||
     extractText(row['Area']) ||
-    'Dubai';
+    '';
+
+  if (!areaRaw || areaRaw.toLowerCase() === 'dubai') {
+    const fullText = `${rawTitle} ${projectName} ${buildingName}`.toLowerCase();
+    if (fullText.includes('palm jumeirah')) {
+      areaRaw = 'Palm Jumeirah';
+    } else if (fullText.includes('downtown')) {
+      areaRaw = 'Downtown Dubai';
+    } else if (fullText.includes('dubai marina') || fullText.includes('marina')) {
+      areaRaw = 'Dubai Marina';
+    } else if (fullText.includes('business bay')) {
+      areaRaw = 'Business Bay';
+    } else if (fullText.includes('dubai hills')) {
+      areaRaw = 'Dubai Hills Estate';
+    } else if (fullText.includes('arabian ranches')) {
+      areaRaw = 'Arabian Ranches 3';
+    } else if (fullText.includes('tilal al ghaf')) {
+      areaRaw = 'Tilal Al Ghaf';
+    } else if (fullText.includes('jumeirah island')) {
+      areaRaw = 'Jumeirah Islands';
+    } else if (fullText.includes('heart of europe')) {
+      areaRaw = 'The Heart of Europe';
+    } else if (fullText.includes('al jadaf') || fullText.includes('palazzo versace') || fullText.includes('culture village')) {
+      areaRaw = 'Al Jaddaf';
+    } else if (fullText.includes('farhad azizi')) {
+      areaRaw = 'Farhad Azizi';
+    } else {
+      areaRaw = 'Dubai';
+    }
+  }
 
   const emirate =
     extractText(row['Emirate']) ||
@@ -464,9 +514,23 @@ export function mapBaserowRowToProperty(
   const developer = extractText(row['Developer']);
   const propertyCondition = extractText(row['Property Condition']) || 'Brand New';
 
-  // 16. Coordinates: Latitude & Longitude (parsed with DMS support)
-  const latNum = parseCoordinate(row['Latitude']);
-  const lngNum = parseCoordinate(row['Longitude']);
+  // 16. Coordinates: Latitude & Longitude (parsed with DMS support + Community fallbacks)
+  let latNum = parseCoordinate(row['Latitude']);
+  let lngNum = parseCoordinate(row['Longitude']);
+
+  if (latNum === null || lngNum === null) {
+    const areaLower = areaRaw.toLowerCase();
+    if (areaLower.includes('palm jumeirah')) {
+      latNum = 25.1124;
+      lngNum = 55.1390;
+    } else if (areaLower.includes('jumeirah island')) {
+      latNum = 25.0594;
+      lngNum = 55.1583;
+    } else if (areaLower.includes('al jadaf') || areaLower.includes('jadaf') || areaLower.includes('versace')) {
+      latNum = 25.2285;
+      lngNum = 55.3340;
+    }
+  }
 
   // 17. Assigned Agent
   let matchedAgent: Agent | undefined;
@@ -483,16 +547,36 @@ export function mapBaserowRowToProperty(
     }
   }
 
-  // 17b. Match via string/text representation
-  const agentRawName =
+  // 17b. Match via string/text representation or property ID tag (e.g. SQFT009-Mousa, JP0381-Jona)
+  let explicitAgentName =
     matchedAgent?.name ||
     extractText(row['Agent']) ||
     extractText(row['agent']) ||
     extractText(row['Agent Name']) ||
     extractText(row['agent_name']) ||
     extractText(row['Assigned Agent']) ||
-    extractText(row['Broker']) ||
-    'Sahar Najahi';
+    extractText(row['Broker']);
+
+  if (!explicitAgentName) {
+    const idLower = customPropId.toLowerCase();
+    if (idLower.includes('mousa') || idLower.includes('muboraksho')) {
+      explicitAgentName = 'Muboraksho Nazarov';
+    } else if (idLower.includes('syeda')) {
+      explicitAgentName = 'Syeda Razvi';
+    } else if (idLower.includes('jaasir')) {
+      explicitAgentName = 'Jaasir Shaikh';
+    } else if (idLower.includes('john') || idLower.includes('jona')) {
+      explicitAgentName = 'John Kolawole';
+    } else if (idLower.includes('sahar')) {
+      explicitAgentName = 'Sahar Najahi';
+    } else if (idLower.includes('julia')) {
+      explicitAgentName = 'Julia Melenchuk';
+    } else if (idLower.includes('ahmad')) {
+      explicitAgentName = 'Ahmad Almir';
+    }
+  }
+
+  const agentRawName = explicitAgentName || 'Sahar Najahi';
 
   const agentKey = agentRawName.toLowerCase().trim();
   if (!matchedAgent && liveAgentsByName?.has(agentKey)) {

@@ -18,7 +18,14 @@ import { SavedPropertiesModal } from './components/SavedPropertiesModal';
 import { Footer } from './components/Footer';
 import { Property, SearchFilterState, PropertyPurpose, Area, Agent } from './types';
 import { properties as fallbackProperties, areas as fallbackAreas, agents as fallbackAgents } from './data/mockData';
-import { BlogPost } from './data/blogData';
+import { BlogPost, blogPosts as defaultBlogPosts } from './data/blogData';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import {
+  subscribeToBlogs,
+  subscribeToLandingSettings,
+  LandingPageSettings,
+  defaultLandingSettings,
+} from './services/adminService';
 import {
   fetchLiveProperties,
   fetchPropertyById,
@@ -50,13 +57,38 @@ export default function App() {
   const [isListPropertyOpen, setIsListPropertyOpen] = useState(false);
   const [listPropertyPurpose, setListPropertyPurpose] = useState<PropertyPurpose>('buy');
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
+  const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const p = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.replace('#', '');
+      const params = new URLSearchParams(window.location.search);
+      return p === '/admin' || p === '/admin/' || p.startsWith('/admin/') || p === '/dashboard' || hash === 'admin' || hash === 'dashboard' || params.get('admin') === 'true';
+    }
+    return false;
+  });
+  const [liveBlogs, setLiveBlogs] = useState<BlogPost[]>(defaultBlogPosts);
+  const [landingSettings, setLandingSettings] = useState<LandingPageSettings>(defaultLandingSettings);
+
+  const handleOpenAdmin = () => {
+    setIsAdminDashboardOpen(true);
+    if (typeof window !== 'undefined' && !window.location.pathname.toLowerCase().startsWith('/admin')) {
+      window.history.pushState(null, '', '/admin');
+    }
+  };
+
+  const handleCloseAdmin = () => {
+    setIsAdminDashboardOpen(false);
+    if (typeof window !== 'undefined' && window.location.pathname.toLowerCase().startsWith('/admin')) {
+      window.history.pushState(null, '', '/');
+    }
+  };
 
   // Dynamically computed areas based on database properties & fetched communities
   const dynamicAreas = useMemo(() => {
     return computeDynamicAreas(propertiesList, areasList);
   }, [propertiesList, areasList]);
 
-  // Fetch LIVE properties, areas, and agents from Baserow on initial mount
+  // Fetch LIVE properties, areas, and agents from Baserow on initial mount + Firestore subscriptions
   useEffect(() => {
     let isMounted = true;
 
@@ -93,16 +125,49 @@ export default function App() {
         console.warn('[App] Could not fetch live areas:', err);
       });
 
+    // 4. Subscribe to live blogs in Firebase
+    const unsubBlogs = subscribeToBlogs((blogs) => {
+      if (isMounted && blogs.length > 0) {
+        setLiveBlogs(blogs);
+      }
+    });
+
+    // 5. Subscribe to landing page config in Firebase
+    const unsubLanding = subscribeToLandingSettings((settings) => {
+      if (isMounted && settings) {
+        setLandingSettings(settings);
+      }
+    });
+
     return () => {
       isMounted = false;
+      unsubBlogs();
+      unsubLanding();
     };
   }, []);
 
-  // Support direct deep link to property by URL hash or search param
+  // Support direct deep link to property by URL or search param (#admin, /admin, etc.)
   useEffect(() => {
     const handleUrlCheck = () => {
+      const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.replace('#', '');
       const params = new URLSearchParams(window.location.search);
+
+      if (
+        path === '/admin' ||
+        path === '/admin/' ||
+        path.startsWith('/admin/') ||
+        path === '/dashboard' ||
+        path === '/dashboard/' ||
+        hash === 'admin' ||
+        hash === 'dashboard' ||
+        params.get('admin') === 'true'
+      ) {
+        setIsAdminDashboardOpen(true);
+      } else if (isAdminDashboardOpen && !path.startsWith('/admin')) {
+        setIsAdminDashboardOpen(false);
+      }
+
       const propId = params.get('property') || (hash.startsWith('property-') ? hash.replace('property-', '') : null);
 
       if (propId) {
@@ -119,7 +184,11 @@ export default function App() {
 
     handleUrlCheck();
     window.addEventListener('hashchange', handleUrlCheck);
-    return () => window.removeEventListener('hashchange', handleUrlCheck);
+    window.addEventListener('popstate', handleUrlCheck);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlCheck);
+      window.removeEventListener('popstate', handleUrlCheck);
+    };
   }, [propertiesList]);
 
   useEffect(() => {
@@ -244,6 +313,7 @@ export default function App() {
         onOpenListProperty={handleOpenListProperty}
         savedCount={savedPropertyIds.length}
         onOpenSavedModal={() => setIsSavedModalOpen(true)}
+        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Main Views Container */}
@@ -256,6 +326,8 @@ export default function App() {
               onSelectArea={handleSelectArea}
               onOpenListProperty={handleOpenListProperty}
               areas={dynamicAreas}
+              headline={landingSettings.heroHeadline}
+              subheadline={landingSettings.heroSubheadline}
             />
 
             {/* SECTION 02 — TRENDING AREAS IN DUBAI BENTO GRID */}
@@ -266,9 +338,14 @@ export default function App() {
             />
 
             {/* SECTION 03 — SELL OR RENT YOUR PROPERTY CTA BANNER */}
-            <SellRentCtaBanner
-              onOpenListProperty={handleOpenListProperty}
-            />
+            {landingSettings.bannerEnabled && (
+              <SellRentCtaBanner
+                onOpenListProperty={handleOpenListProperty}
+                title={landingSettings.bannerTitle}
+                subtitle={landingSettings.bannerSubtitle}
+                ctaText={landingSettings.bannerCtaText}
+              />
+            )}
 
             {/* SECTION 04 — HOT LISTINGS OF THE WEEK CAROUSEL */}
             <NewSecondaryProjects
@@ -281,6 +358,7 @@ export default function App() {
             <BlogPreview
               onViewAllBlog={() => navigateTo('blog')}
               onSelectPost={handleSelectBlogPost}
+              posts={liveBlogs}
             />
           </div>
         )}
@@ -311,6 +389,7 @@ export default function App() {
             onNavigateToProperties={() => navigateTo('properties')}
             onOpenListProperty={() => handleOpenListProperty('buy')}
             initialPost={selectedBlogPost}
+            posts={liveBlogs}
           />
         )}
 
@@ -370,6 +449,13 @@ export default function App() {
       <Footer
         onNavigate={navigateTo}
         onOpenListProperty={handleOpenListProperty}
+        onOpenAdmin={handleOpenAdmin}
+      />
+
+      {/* Firebase-Connected Admin Dashboard */}
+      <AdminDashboard
+        isOpen={isAdminDashboardOpen}
+        onClose={handleCloseAdmin}
       />
     </div>
   );

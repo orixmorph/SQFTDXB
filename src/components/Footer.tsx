@@ -5,11 +5,13 @@ import { PropertyPurpose } from '../types';
 interface FooterProps {
   onNavigate: (view: string, filter?: { purpose?: PropertyPurpose; areaId?: string }) => void;
   onOpenListProperty: (purpose?: PropertyPurpose) => void;
+  onOpenAdmin?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onNavigate,
   onOpenListProperty,
+  onOpenAdmin,
 }) => {
   return (
     <footer className="w-full bg-black border-t border-[#222222] text-white pt-14 pb-12">
@@ -196,6 +198,17 @@ export const Footer: React.FC<FooterProps> = ({
                   Terms of Service
                 </button>
               </li>
+              {onOpenAdmin && (
+                <li>
+                  <button
+                    onClick={onOpenAdmin}
+                    className="text-[#CF9F5D] hover:text-[#e2b77a] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span>Staff / Admin Portal</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </button>
+                </li>
+              )}
               <li>
                 <span className="text-[#737373]">Bayswater Tower, 8th & 11th Floor, Business Bay</span>
               </li>

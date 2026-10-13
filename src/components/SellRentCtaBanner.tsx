@@ -16,6 +16,9 @@ import { PropertyPurpose } from '../types';
 
 interface SellRentCtaBannerProps {
   onOpenListProperty: (purpose: PropertyPurpose) => void;
+  title?: string;
+  subtitle?: string;
+  ctaText?: string;
 }
 
 interface StepItem {
@@ -31,7 +34,12 @@ interface StepItem {
   actionLabel: string;
 }
 
-export const SellRentCtaBanner: React.FC<SellRentCtaBannerProps> = ({ onOpenListProperty }) => {
+export const SellRentCtaBanner: React.FC<SellRentCtaBannerProps> = ({
+  onOpenListProperty,
+  title,
+  subtitle,
+  ctaText,
+}) => {
   const [activeStepId, setActiveStepId] = useState<number>(1);
 
   const steps: StepItem[] = [
@@ -133,10 +141,10 @@ export const SellRentCtaBanner: React.FC<SellRentCtaBannerProps> = ({ onOpenList
                 <span>Simple 4-Step Process for Owners</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#171717] leading-tight">
-                Sell or Rent Your Property
+                {title || "Sell or Rent Your Property"}
               </h2>
               <p className="text-sm sm:text-base text-[#606060] mt-1.5 leading-relaxed">
-                A simple, transparent 4-step path to find the right buyer and close with ease. No hidden fees or complicated paperwork.
+                {subtitle || "A simple, transparent 4-step path to find the right buyer and close with ease. No hidden fees or complicated paperwork."}
               </p>
             </div>
 
@@ -147,7 +155,7 @@ export const SellRentCtaBanner: React.FC<SellRentCtaBannerProps> = ({ onOpenList
                 onClick={() => onOpenListProperty('buy')}
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#171717] hover:bg-[#2A2A2A] text-white text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow cursor-pointer group"
               >
-                <span>List for Sale</span>
+                <span>{ctaText || "List for Sale"}</span>
                 <ArrowRight className="w-4 h-4 text-[#CF9F5D] transition-transform group-hover:translate-x-0.5" />
               </button>
               <button
