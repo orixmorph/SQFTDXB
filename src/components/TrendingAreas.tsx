@@ -37,14 +37,38 @@ export const TrendingAreas: React.FC<TrendingAreasProps> = ({
   // Tag areas by category
   const filteredAreas = areas.filter((area) => {
     const id = area.id.toLowerCase();
+    const name = area.name.toLowerCase();
     if (activeCategory === 'waterfront') {
-      return ['dubai-marina', 'palm-jumeirah', 'jbr', 'jumeirah', 'tilal-al-ghaf'].some((k) => id.includes(k));
+      return ['marina', 'palm', 'jbr', 'lagoons', 'island', 'beach', 'creek', 'waterfront', 'europe', 'tilal'].some(
+        (k) => id.includes(k) || name.includes(k)
+      );
     }
     if (activeCategory === 'urban') {
-      return ['downtown', 'business-bay', 'difc', 'mohammed-bin-rashid', 'district-11'].some((k) => id.includes(k));
+      return [
+        'downtown',
+        'business-bay',
+        'burj',
+        'mohammed-bin-rashid',
+        'district-11',
+        'meydan',
+        'sobha',
+        'studio',
+        'sports',
+        'healthcare',
+        'arjan',
+        'furjan',
+        'jadaf',
+        'jvc',
+        'jvt',
+        'jlt',
+        'village-circle',
+        'village-triangle',
+      ].some((k) => id.includes(k) || name.includes(k));
     }
     if (activeCategory === 'estates') {
-      return ['dubai-hills', 'arabian-ranches', 'sheba', 'emirates-hills'].some((k) => id.includes(k));
+      return ['hills', 'ranches', 'sheba', 'ghaf', 'south', 'town-square'].some(
+        (k) => id.includes(k) || name.includes(k)
+      );
     }
     return true;
   }).slice(0, 8);
@@ -113,16 +137,15 @@ export const TrendingAreas: React.FC<TrendingAreasProps> = ({
                 key={area.id}
                 id={`area-card-${area.id}`}
                 onClick={() => onSelectArea(area.id)}
-                initial={{ opacity: 0, y: 32, scale: 0.96 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
                 transition={{
                   duration: 0.45,
                   delay: (index % 4) * 0.08,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                className={`group relative rounded-3xl overflow-hidden cursor-pointer border border-[#E8E8E6] bg-[#121214] shadow-sm hover:shadow-[0_16px_36px_rgba(0,0,0,0.14)] transition-all ${colSpanClass}`}
+                className={`group relative rounded-3xl overflow-hidden cursor-pointer border border-[#E8E8E6] bg-[#121214] shadow-sm hover:border-[#CF9F5D]/50 ${colSpanClass}`}
               >
                 {/* Image */}
                 <img

@@ -55,13 +55,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           className="secure-image w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 select-none pointer-events-none"
         />
 
-        {/* Centered 35% Opacity Pure White Watermark Protection (No Text) */}
+        {/* Centered 40% Opacity Watermark Protection */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10">
           <img
-            src="https://res.cloudinary.com/dy6km7beb/image/upload/c_crop,w_450,h_450,x_25,y_103/v1789980615/Untitled_design_11_ocowpa.png"
+            src="https://ik.imagekit.io/zb5ih81ig/Add%20a%20heading%20(26).png"
             alt="SQFT DXB Watermark"
             draggable={false}
-            className="w-16 sm:w-20 h-auto object-contain opacity-35 select-none pointer-events-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)] filter brightness-0 invert"
+            className="w-16 sm:w-20 h-auto object-contain opacity-40 select-none pointer-events-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
             referrerPolicy="no-referrer"
           />
         </div>

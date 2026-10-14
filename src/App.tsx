@@ -28,9 +28,18 @@ import {
 } from './services/propertyService';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<string>('home');
+  const [currentView, setCurrentView] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const page = params.get('page')?.toLowerCase();
+      if (page && ['home', 'properties', 'areas', 'blog', 'about', 'contact'].includes(page)) {
+        return page;
+      }
+    }
+    return 'home';
+  });
   const [propertiesList, setPropertiesList] = useState<Property[]>([]);
-  const [areasList, setAreasList] = useState<Area[]>(fallbackAreas);
+  const [areasList, setAreasList] = useState<Area[]>([]);
   const [agentsList, setAgentsList] = useState<Agent[]>(fallbackAgents);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
@@ -98,11 +107,23 @@ export default function App() {
     };
   }, []);
 
+  // Handle Browser Back Button & History Navigation for Property Detail View
+  useEffect(() => {
+    const handlePopState = () => {
+      // If a property detail view is currently open, pressing back brings user back to the previous screen
+      setSelectedProperty(null);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Support direct deep link to property by URL hash or search param
   useEffect(() => {
     const handleUrlCheck = () => {
-      const hash = window.location.hash.replace('#', '');
+      const hash = window.location.hash.replace('#', '').toLowerCase();
       const params = new URLSearchParams(window.location.search);
+
       const propId = params.get('property') || (hash.startsWith('property-') ? hash.replace('property-', '') : null);
 
       if (propId) {
@@ -158,6 +179,12 @@ export default function App() {
   }, []);
 
   const handleSelectProperty = (prop: Property) => {
+    // Push history state so the browser back button returns to the previous screen instead of exiting the site
+    try {
+      window.history.pushState({ modal: 'property', id: prop.id }, '', `#property-${prop.id}`);
+    } catch {
+      // Fallback if pushState fails
+    }
     setSelectedProperty(prop);
     // Asynchronously retrieve full property record if updated
     if (prop.id) {
@@ -166,6 +193,17 @@ export default function App() {
           setSelectedProperty(fullProp);
         }
       });
+    }
+  };
+
+  const handleCloseProperty = () => {
+    setSelectedProperty(null);
+    if (typeof window !== 'undefined') {
+      if (window.history.state?.modal === 'property') {
+        window.history.back();
+      } else if (window.location.hash.startsWith('#property-')) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
     }
   };
 
@@ -340,12 +378,12 @@ export default function App() {
         )}
       </main>
 
-      {/* Property Detail Modal */}
+      {/* Property Detail Full-Screen View */}
       <PropertyDetailModal
         property={selectedProperty}
         allProperties={propertiesList}
         onSelectProperty={handleSelectProperty}
-        onClose={() => setSelectedProperty(null)}
+        onClose={handleCloseProperty}
         isSaved={selectedProperty ? savedPropertyIds.includes(selectedProperty.id) : false}
         onToggleSave={handleToggleSaveProperty}
       />

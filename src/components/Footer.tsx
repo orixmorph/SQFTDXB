@@ -5,11 +5,13 @@ import { PropertyPurpose } from '../types';
 interface FooterProps {
   onNavigate: (view: string, filter?: { purpose?: PropertyPurpose; areaId?: string }) => void;
   onOpenListProperty: (purpose?: PropertyPurpose) => void;
+  onOpenAdmin?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onNavigate,
   onOpenListProperty,
+  onOpenAdmin,
 }) => {
   return (
     <footer className="w-full bg-black border-t border-[#222222] text-white pt-14 pb-12">
@@ -19,7 +21,7 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="lg:col-span-2 space-y-4">
             <div className="flex flex-col items-start gap-2">
               <img
-                src="https://res.cloudinary.com/dy6km7beb/image/upload/v1789980615/Untitled_design_11_ocowpa.png"
+                src="https://ik.imagekit.io/zb5ih81ig/SITE%20LOGOS%20(1).png?updatedAt=1791790631428"
                 alt="SQFT DXB - WE FIND, YOU MOVE IN"
                 className="h-10 sm:h-12 w-auto object-contain"
                 referrerPolicy="no-referrer"
@@ -196,15 +198,26 @@ export const Footer: React.FC<FooterProps> = ({
                   Terms of Service
                 </button>
               </li>
+              {onOpenAdmin && (
+                <li>
+                  <button
+                    onClick={onOpenAdmin}
+                    className="text-[#CF9F5D] hover:text-[#e2b77a] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span>Staff / Admin Portal</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </button>
+                </li>
+              )}
               <li>
                 <span className="text-[#737373]">Bayswater Tower, 8th & 11th Floor, Business Bay</span>
               </li>
               <li>
                 <a
-                  href="tel:+97148123400"
+                  href="tel:+971588648093"
                   className="hover:text-white transition-colors"
                 >
-                  +971 4 812 3400
+                  +971 58 864 8093
                 </a>
               </li>
             </ul>

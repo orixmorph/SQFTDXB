@@ -15,9 +15,9 @@ import {
 import { PropertyPurpose, SearchFilterState, Area } from '../types';
 import { areas as defaultAreas } from '../data/mockData';
 
-// Replace this Cloudinary URL with your desired 1st section background image link
+// Hero section background image link
 export const HERO_SECTION_BG_IMAGE =
-  'https://res.cloudinary.com/dy6km7beb/image/upload/v1789983767/ChatGPT_Image_Sep_19_2026_11_20_31_AM_bjcrx2.png';
+  'https://ik.imagekit.io/zb5ih81ig/Dubai%20Property%20App%20at%20Golden%20Hour.png';
 
 interface HeroProps {
   onSearch: (filter: Partial<SearchFilterState>) => void;
@@ -25,6 +25,8 @@ interface HeroProps {
   onOpenListProperty?: (purpose: PropertyPurpose) => void;
   backgroundImageUrl?: string;
   areas?: Area[];
+  headline?: string;
+  subheadline?: string;
 }
 
 export const Hero: React.FC<HeroProps> = ({
@@ -33,6 +35,8 @@ export const Hero: React.FC<HeroProps> = ({
   onOpenListProperty,
   backgroundImageUrl,
   areas = defaultAreas,
+  headline,
+  subheadline,
 }) => {
   const [purpose, setPurpose] = useState<PropertyPurpose>('buy');
   const [selectedArea, setSelectedArea] = useState<string>('');
@@ -127,10 +131,10 @@ export const Hero: React.FC<HeroProps> = ({
         {/* Hero Headline & Subtitle */}
         <div className="text-center max-w-3xl mx-auto mb-6">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#171717] tracking-tight leading-[1.15] mb-2.5">
-            We Find, You Move in
+            {headline || "We Find, You Move in"}
           </h1>
           <p className="text-sm sm:text-base text-[#4A4A4A] font-medium leading-relaxed max-w-2xl mx-auto">
-            Discover verified secondary market residences, commercial spaces, and ready properties across Dubai’s most desirable communities. Actual photos, confirmed availability, and immediate handover.
+            {subheadline || "Discover verified secondary market residences, commercial spaces, and ready properties across Dubai’s most desirable communities. Actual photos, confirmed availability, and immediate handover."}
           </p>
         </div>
 

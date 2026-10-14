@@ -153,7 +153,7 @@ export async function fetchLiveAreas(forceRefresh = false): Promise<Area[]> {
     });
 
     if (!res.ok) {
-      return fallbackAreas;
+      return [];
     }
 
     const data = await res.json();
@@ -161,83 +161,103 @@ export async function fetchLiveAreas(forceRefresh = false): Promise<Area[]> {
       return data.data;
     }
 
-    return fallbackAreas;
+    return [];
   } catch (error) {
     console.warn('[PropertyService] Network error fetching areas:', error);
-    return fallbackAreas;
+    return [];
   }
 }
 
 /**
- * Client-side helper to dynamically compute & auto-discover areas from loaded live properties.
- * If a new listing is added in Baserow (e.g. for DIFC), it automatically surfaces the area with
- * its picture, title, landmark, and exact ready properties count.
+ * Client-side helper to dynamically compute & deduplicate areas strictly from loaded live database properties.
+ * Eliminates duplicate areas and only surfaces communities that actually exist in the Baserow database.
  */
-export function computeDynamicAreas(liveProperties: Property[], baseAreas: Area[] = fallbackAreas): Area[] {
-  const result: Area[] = [];
-  const processedSlugs = new Set<string>();
-
-  // Helper to match area
-  const matchArea = (p: Property, areaId: string, areaName: string) => {
-    const pArea = (p.area || '').toLowerCase().trim();
-    const pAreaId = (p.areaId || '').toLowerCase().trim();
-    const aId = areaId.toLowerCase().trim();
-    const aName = areaName.toLowerCase().trim();
-
-    if (pAreaId === aId || pArea === aName) return true;
-    if (aId && pAreaId.includes(aId)) return true;
-    if (pAreaId && aId.includes(pAreaId)) return true;
-    if (aName && pArea.includes(aName)) return true;
-    if (pArea && aName.includes(pArea)) return true;
-    if ((aId === 'difc' || aName === 'difc') && (pArea.includes('difc') || pArea.includes('financial'))) return true;
-    return false;
-  };
-
-  // 1. Process base areas with exact property counts from live database
-  for (const base of baseAreas) {
-    const matching = liveProperties.filter((p) => matchArea(p, base.id, base.name));
-    const liveCount = matching.length;
-    const propImage = matching.find((p) => p.images && p.images.length > 0)?.images[0];
-
-    processedSlugs.add(base.id);
-    result.push({
-      ...base,
-      image: propImage || base.image,
-      propertyCount: liveCount,
-      readyCount: liveCount,
-      avgPriceSqft: 0, // Hidden as requested
-    });
-  }
-
-  // 2. Discover any brand new area present in live properties (e.g. DIFC if not already listed)
-  for (const p of liveProperties) {
-    const areaName = (p.area || '').trim();
-    if (!areaName || areaName.toLowerCase() === 'dubai') continue;
-    const slug = (p.areaId || areaName.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-'));
-
-    if (!processedSlugs.has(slug)) {
-      processedSlugs.add(slug);
-      const matching = liveProperties.filter((item) => matchArea(item, slug, areaName));
-      const liveCount = matching.length;
-      const propImage = matching.find((item) => item.images && item.images.length > 0)?.images[0];
-
-      result.push({
-        id: slug,
-        name: areaName,
-        slug,
-        image: propImage || 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=85',
-        description: `Premier ready residential community in ${areaName}, Dubai. Featuring verified secondary residences with title deeds verified and immediate key handover.`,
-        landmark: matching[0]?.projectName || `${areaName} Central`,
-        popularTypes: Array.from(new Set(matching.map((item) => item.propertyType).filter(Boolean))),
-        propertyCount: liveCount,
-        readyCount: liveCount,
-        avgPriceSqft: 0,
-        featured: true,
-      });
+export function computeDynamicAreas(liveProperties: Property[], baseAreas: Area[] = []): Area[] {
+  // If baseAreas contains valid database-sourced areas, use them as lookup for enriched metadata
+  const areaMetadataMap = new Map<string, Area>();
+  for (const b of baseAreas) {
+    const key = (b.slug || b.id || '').toLowerCase().trim();
+    if (key) {
+      areaMetadataMap.set(key, b);
+      areaMetadataMap.set(b.name.toLowerCase().trim(), b);
     }
   }
 
-  // Sort: areas with live properties first (descending), then alphabetically
+  const areaMap = new Map<
+    string,
+    {
+      id: string;
+      name: string;
+      slug: string;
+      matchingProps: Property[];
+    }
+  >();
+
+  // Extract areas strictly from live database properties
+  for (const p of liveProperties) {
+    const rawName = (p.area || '').trim();
+    if (!rawName || rawName.toLowerCase() === 'dubai') continue;
+
+    const slug = (
+      p.areaId || rawName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    )
+      .toLowerCase()
+      .trim();
+    if (!slug) continue;
+
+    if (!areaMap.has(slug)) {
+      areaMap.set(slug, {
+        id: slug,
+        name: rawName,
+        slug,
+        matchingProps: [],
+      });
+    }
+
+    areaMap.get(slug)!.matchingProps.push(p);
+  }
+
+  // If liveProperties is still loading but baseAreas has areas, use baseAreas directly
+  if (areaMap.size === 0 && baseAreas.length > 0) {
+    return baseAreas;
+  }
+
+  const result: Area[] = [];
+
+  for (const [slug, { name, matchingProps }] of areaMap.entries()) {
+    const liveCount = matchingProps.length;
+    const existing = areaMetadataMap.get(slug) || areaMetadataMap.get(name.toLowerCase().trim());
+
+    const propImage = matchingProps.find((p) => p.images && p.images.length > 0)?.images[0];
+    const image =
+      existing?.image ||
+      propImage ||
+      'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=85';
+
+    const types = Array.from(new Set(matchingProps.map((p) => p.propertyType).filter(Boolean)));
+    const popularTypes = types.length > 0 ? types : existing?.popularTypes || ['Apartment', 'Villa'];
+
+    const landmark = matchingProps[0]?.projectName || existing?.landmark || `${name} Central`;
+    const description =
+      existing?.description ||
+      `Premier secondary residential destination in ${name}, Dubai. Featuring verified ready-to-move properties with title deeds verified and immediate key handover.`;
+
+    result.push({
+      id: slug,
+      name,
+      slug,
+      image,
+      description,
+      landmark,
+      popularTypes,
+      propertyCount: liveCount,
+      readyCount: liveCount,
+      avgPriceSqft: 0,
+      featured: true,
+    });
+  }
+
+  // Sort: areas with most live properties first (descending), then alphabetically
   result.sort((a, b) => {
     if (b.readyCount !== a.readyCount) return b.readyCount - a.readyCount;
     return a.name.localeCompare(b.name);

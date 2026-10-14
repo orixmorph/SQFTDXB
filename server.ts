@@ -123,6 +123,13 @@ app.get(['/p/:id', '/share/:id'], (req, res) => {
 });
 
 /**
+ * Direct route redirect for The Parkways custom villa landing page: /the-parkways or /parkways
+ */
+app.get(['/the-parkways', '/parkways'], (_req, res) => {
+  res.redirect('/?page=the-parkways');
+});
+
+/**
  * POST /api/submit-lead
  * Confidential server-side lead ingestion.
  * Dispatches inquiries to the Google Apps Script Web App without exposing

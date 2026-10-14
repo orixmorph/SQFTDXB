@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Heart, Plus, Building2, ChevronRight, PhoneCall } from 'lucide-react';
+import { Menu, X, Heart, Plus, Building2, ChevronRight, PhoneCall, ShieldCheck } from 'lucide-react';
 import { PropertyPurpose } from '../types';
 
 interface NavbarProps {
@@ -8,6 +8,7 @@ interface NavbarProps {
   onOpenListProperty: (purpose?: PropertyPurpose) => void;
   savedCount: number;
   onOpenSavedModal: () => void;
+  onOpenAdmin?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -16,6 +17,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenListProperty,
   savedCount,
   onOpenSavedModal,
+  onOpenAdmin,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -57,7 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label="SQFT DXB Home"
             >
               <img
-                src="https://res.cloudinary.com/dy6km7beb/image/upload/v1789980615/Untitled_design_11_ocowpa.png"
+                src="https://ik.imagekit.io/zb5ih81ig/SITE%20LOGOS%20(1).png?updatedAt=1791790631428"
                 alt="SQFT DXB"
                 className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 referrerPolicy="no-referrer"
@@ -100,6 +102,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {savedCount}
                   </span>
                 )}
+              </button>
+            )}
+
+            {/* Executive Admin Portal */}
+            {onOpenAdmin && (
+              <button
+                id="nav-admin-portal-btn"
+                onClick={onOpenAdmin}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#D4D4D4] hover:text-white bg-[#1A1A1A] hover:bg-[#252525] border border-[#2E2E2E] transition-all cursor-pointer"
+                title="Executive Admin Portal"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-[#CF9F5D]" />
+                <span>Admin</span>
               </button>
             )}
 
@@ -231,6 +246,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Contact Advisors</span>
               <ChevronRight className="w-4 h-4 text-[#888888]" />
             </button>
+
+            {onOpenAdmin && (
+              <button
+                id="mobile-nav-admin"
+                onClick={() => {
+                  onOpenAdmin();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold text-[#CF9F5D] hover:bg-white/10 cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#CF9F5D]" />
+                  <span>Admin & Dashboard</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[#CF9F5D]" />
+              </button>
+            )}
           </div>
 
           <div className="pt-2 border-t border-[#222222] space-y-3">

@@ -1099,7 +1099,9 @@ export const CURATED_AREA_METADATA: Record<
 };
 
 /**
- * Checks if a property belongs to a given area by checking areaId, area text, and partial substrings.
+ * Checks if a property belongs to a given area by exact match on area name or areaId.
+ * Substring matching is strictly avoided so communities like 'Jumeirah' do not steal
+ * properties from 'Jumeirah Village Circle', 'Jumeirah Beach Residence', or 'The Palm Jumeirah'.
  */
 function matchesArea(property: Property, targetSlug: string, targetName: string): boolean {
   const pArea = (property.area || '').toLowerCase().trim();
@@ -1108,129 +1110,79 @@ function matchesArea(property: Property, targetSlug: string, targetName: string)
   const tName = targetName.toLowerCase().trim();
 
   if (pAreaId === tSlug || pArea === tName) return true;
-  if (tSlug && pAreaId.includes(tSlug)) return true;
-  if (pAreaId && tSlug.includes(pAreaId)) return true;
-  if (tName && pArea.includes(tName)) return true;
-  if (pArea && tName.includes(pArea)) return true;
-
-  // Specific community aliases
-  if ((tSlug === 'difc' || tName === 'difc') && (pArea.includes('difc') || pArea.includes('financial'))) return true;
-  if (tSlug.includes('arabian-ranches') && pArea.includes('arabian ranches')) return true;
-  if (tSlug.includes('sheba') && pArea.includes('sheba')) return true;
-  if (tSlug.includes('mohammed-bin-rashid') && (pArea.includes('mbr') || pArea.includes('mohammed bin rashid'))) return true;
+  if (pAreaId && tSlug && pAreaId === tSlug) return true;
 
   return false;
 }
 
 /**
  * Fetch all areas dynamically from the database.
- * - Auto-discovers any new area added in Table 1210850 (Properties) or Table 1210847 (Communities).
- * - Exact property count is computed directly from live database properties!
- * - Photos and landmarks are auto-linked from listings.
- * - Avg. secondary rate is excluded.
+ * Sourced strictly from the Baserow database properties to ensure zero duplicates
+ * and zero fictitious areas.
  */
 export async function getLiveAreas(forceRefresh = false): Promise<Area[]> {
   const { properties } = await getLiveProperties(forceRefresh);
 
-  // 1. Collect all communities from Table 1210847
-  const token = process.env.BASEROW_API_TOKEN || BASEROW_API_TOKEN;
-  const discoveredNames = new Set<string>();
-
-  try {
-    const url = buildBaserowUrl(BASEROW_COMMUNITIES_TABLE_ID);
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Token ${token}`,
-        Accept: 'application/json',
-      },
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      const rows: Record<string, any>[] = Array.isArray(data) ? data : data.results || [];
-      for (const row of rows) {
-        const name = extractText(row['Community Name']) || extractText(row['Name']);
-        if (name && name.toLowerCase() !== 'dubai') {
-          discoveredNames.add(name);
-        }
-      }
+  // Group and deduplicate areas strictly from the database properties
+  const areaMap = new Map<
+    string,
+    {
+      name: string;
+      slug: string;
+      matchingProps: Property[];
     }
-  } catch (error) {
-    console.error('[Baserow] Failed to fetch communities table:', error);
-  }
+  >();
 
-  // 2. Discover any area present in live properties (e.g. newly added DIFC, etc.)
   for (const p of properties) {
-    const areaName = (p.area || '').trim();
-    if (areaName && areaName.toLowerCase() !== 'dubai') {
-      discoveredNames.add(areaName);
+    const rawName = (p.area || '').trim();
+    if (!rawName || rawName.toLowerCase() === 'dubai') continue;
+
+    const slug = (p.areaId || slugify(rawName)).toLowerCase().trim();
+    if (!slug) continue;
+
+    if (!areaMap.has(slug)) {
+      areaMap.set(slug, {
+        name: rawName,
+        slug,
+        matchingProps: [],
+      });
     }
+
+    areaMap.get(slug)!.matchingProps.push(p);
   }
 
-  // 3. Include standard Dubai prime areas
-  for (const meta of Object.values(CURATED_AREA_METADATA)) {
-    discoveredNames.add(meta.name);
-  }
-
-  // 4. Build comprehensive Area list with exact live counts from database
   const areasList: Area[] = [];
-  const processedSlugs = new Set<string>();
-  const processedNames = new Set<string>();
 
-  for (const name of discoveredNames) {
-    const slug = slugify(name);
-    if (!slug || processedSlugs.has(slug)) continue;
-
-    // Look for exact matching curated metadata first
-    let curatedKey: string | undefined;
-    if (CURATED_AREA_METADATA[slug]) {
-      curatedKey = slug;
-    } else {
-      curatedKey = Object.keys(CURATED_AREA_METADATA).find(
-        (k) => CURATED_AREA_METADATA[k].name.toLowerCase() === name.toLowerCase()
-      );
-    }
-    if (!curatedKey) {
-      curatedKey = Object.keys(CURATED_AREA_METADATA).find(
-        (k) => k === slug || (slug.startsWith(k) && k.length > 5)
-      );
-    }
-
-    const curated = curatedKey ? CURATED_AREA_METADATA[curatedKey] : null;
-    const finalName = curated?.name || name;
-    const finalSlug = slugify(finalName);
-
-    if (processedNames.has(finalName.toLowerCase()) || processedSlugs.has(finalSlug)) {
-      continue;
-    }
-    processedSlugs.add(slug);
-    processedSlugs.add(finalSlug);
-    processedNames.add(finalName.toLowerCase());
-
-    // Filter properties matching this area in the database
-    const matchingProps = properties.filter((p) => matchesArea(p, finalSlug, finalName));
+  for (const [slug, { name, matchingProps }] of areaMap.entries()) {
     const liveCount = matchingProps.length;
 
-    // Pick photo: property photo if available, or curated photo, or high-res Dubai photo
-    const propImage = matchingProps.find((p) => p.images && p.images.length > 0)?.images[0];
-    const image = propImage || curated?.image || 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=85';
+    // Optional visual enrichment only if matching curated metadata exists
+    const curated =
+      CURATED_AREA_METADATA[slug] ||
+      Object.values(CURATED_AREA_METADATA).find((m) => m.name.toLowerCase() === name.toLowerCase());
 
-    // Unique property types
+    // Prefer high-res property photo, fallback to curated image if available
+    const propImage = matchingProps.find((p) => p.images && p.images.length > 0)?.images[0];
+    const image =
+      propImage ||
+      curated?.image ||
+      'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=85';
+
+    // Unique property types in this area
     const types = Array.from(new Set(matchingProps.map((p) => p.propertyType).filter(Boolean)));
     const popularTypes = types.length > 0 ? types : curated?.popularTypes || ['Apartment', 'Villa'];
 
-    // Landmark: project name from matching property, or curated, or default
-    const landmark = matchingProps[0]?.projectName || curated?.landmark || `${finalName} District`;
+    // Landmark: project name from property or curated
+    const landmark = matchingProps[0]?.projectName || curated?.landmark || `${name} Central`;
 
-    // Description
     const description =
       curated?.description ||
-      `Premier secondary residential destination in ${finalName}, Dubai. Featuring ready-to-move properties with title deeds verified and immediate key handover.`;
+      `Premier secondary residential destination in ${name}, Dubai. Featuring verified ready-to-move properties with title deeds verified and immediate key handover.`;
 
     areasList.push({
-      id: finalSlug,
-      name: finalName,
-      slug: finalSlug,
+      id: slug,
+      name,
+      slug,
       image,
       description,
       landmark,
@@ -1242,7 +1194,7 @@ export async function getLiveAreas(forceRefresh = false): Promise<Area[]> {
     });
   }
 
-  // Sort areas: communities with live properties first (descending), then alphabetically
+  // Sort: areas with live properties first (descending), then alphabetically by name
   areasList.sort((a, b) => {
     if (b.readyCount !== a.readyCount) return b.readyCount - a.readyCount;
     return a.name.localeCompare(b.name);

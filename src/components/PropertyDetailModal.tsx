@@ -14,6 +14,7 @@ import {
   Heart,
   ChevronLeft,
   ChevronRight,
+  ArrowLeft,
   Car,
   Layers,
   Sparkles,
@@ -138,6 +139,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   onToggleSave,
   allProperties = [],
   onSelectProperty,
+  onOpenParkwaysShowcase,
 }) => {
   if (!property) return null;
 
@@ -366,21 +368,33 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div
-        id="property-detail-modal"
-        className="relative w-full max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1540px] bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[95vh] flex flex-col"
-      >
-        {/* Sticky Header Bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EAEAEA] bg-white sticky top-0 z-30">
-          <div className="flex items-center gap-2">
+    <div
+      id="property-detail-modal"
+      className="fixed inset-0 z-50 bg-white overflow-y-auto flex flex-col animate-in fade-in duration-150"
+    >
+      <div className="w-full flex flex-col min-h-screen bg-white">
+        {/* Sticky Full-Width Header Bar */}
+        <div className="flex items-center justify-between px-4 sm:px-8 py-3.5 border-b border-[#EAEAEA] bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Direct In-App Back Button */}
+            <button
+              id="modal-back-btn"
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#171717] hover:bg-[#2A2A2A] text-white text-xs font-semibold transition-all cursor-pointer shadow-xs group"
+              aria-label="Back to listings"
+              title="Return to previous screen"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+              <span>Back</span>
+            </button>
+
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#171717] text-white">
               {property.purpose === 'buy' ? 'For Sale' : 'For Rent'}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F7F7F5] text-[#CF9F5D] border border-[#EAEAEA]">
+            <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F7F7F5] text-[#CF9F5D] border border-[#EAEAEA]">
               {property.readyStatus}
             </span>
-            <span className="hidden sm:inline-block text-xs text-[#8A8A8A]">
+            <span className="hidden md:inline-block text-xs text-[#8A8A8A]">
               Ref: {property.referenceNumber}
             </span>
           </div>
@@ -488,8 +502,8 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Scrollable Modal Content */}
-        <div id="property-detail-modal-body" className="overflow-y-auto p-4 sm:p-6 md:p-8 space-y-8 flex-1">
+        {/* Scrollable Full-Screen Content */}
+        <div id="property-detail-modal-body" className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-8 flex-1">
           {/* Top Section: Split Hero on Desktop, Stacked on Mobile */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start pb-8 border-b border-[#F0F0EE]">
             {/* Left: Gallery Showcase (lg:col-span-7) */}
@@ -512,13 +526,13 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   className="secure-image w-full h-full object-cover transition-all duration-300 select-none pointer-events-none"
                 />
 
-                {/* Centered 35% Opacity Pure White Watermark Protection (No Text) */}
+                {/* Centered 40% Opacity Watermark Protection */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10">
                   <img
-                    src="https://res.cloudinary.com/dy6km7beb/image/upload/c_crop,w_450,h_450,x_25,y_103/v1789980615/Untitled_design_11_ocowpa.png"
+                    src="https://ik.imagekit.io/zb5ih81ig/Add%20a%20heading%20(26).png"
                     alt="SQFT DXB Watermark"
                     draggable={false}
-                    className="w-24 sm:w-32 md:w-36 h-auto object-contain opacity-35 select-none pointer-events-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)] filter brightness-0 invert"
+                    className="w-24 sm:w-32 md:w-36 h-auto object-contain opacity-40 select-none pointer-events-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
                     referrerPolicy="no-referrer"
                   />
                 </div>
@@ -1059,13 +1073,13 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                               onContextMenu={(e) => e.preventDefault()}
                               className="secure-image w-full h-full object-cover transition-transform duration-300 group-hover/prop:scale-105 select-none pointer-events-none"
                             />
-                            {/* Centered White Logo Watermark */}
+                            {/* Centered Watermark */}
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10">
                               <img
-                                src="https://res.cloudinary.com/dy6km7beb/image/upload/c_crop,w_450,h_450,x_25,y_103/v1789980615/Untitled_design_11_ocowpa.png"
+                                src="https://ik.imagekit.io/zb5ih81ig/Add%20a%20heading%20(26).png"
                                 alt="SQFT"
                                 draggable={false}
-                                className="w-6 h-auto object-contain opacity-35 select-none pointer-events-none drop-shadow filter brightness-0 invert"
+                                className="w-6 h-auto object-contain opacity-40 select-none pointer-events-none drop-shadow"
                               />
                             </div>
                           </div>

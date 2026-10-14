@@ -82,7 +82,7 @@ export const ContactView: React.FC = () => {
                 <Phone className="w-5 h-5 text-[#CF9F5D] flex-shrink-0" />
                 <div>
                   <strong className="block text-[#171717]">Direct Advisory Line</strong>
-                  <span>+971 4 812 3400</span>
+                  <a href="tel:+971588648093" className="hover:text-[#CF9F5D] transition-colors">+971 58 864 8093</a>
                 </div>
               </div>
 

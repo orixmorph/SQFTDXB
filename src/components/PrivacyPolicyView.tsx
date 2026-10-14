@@ -182,7 +182,7 @@ export const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({ onBackToHo
               <div className="font-bold text-[#171717] text-sm">SQFT DXB Compliance Office</div>
               <div>Powered by Jamoka Properties (RERA ORN: 49679)</div>
               <div>Boulevard Plaza, Tower 1, Downtown Dubai, UAE</div>
-              <div>Telephone: <a href="tel:+97148123400" className="text-[#171717] font-semibold hover:text-[#CF9F5D]">+971 4 812 3400</a></div>
+              <div>Telephone: <a href="tel:+971588648093" className="text-[#171717] font-semibold hover:text-[#CF9F5D]">+971 58 864 8093</a></div>
               <div>Email: <a href="mailto:privacy@sqftdxb.com" className="text-[#CF9F5D] font-semibold underline">privacy@sqftdxb.com</a></div>
             </div>
           </section>
