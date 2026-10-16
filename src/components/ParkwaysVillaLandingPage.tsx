@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Bed,
   Bath,
@@ -39,6 +39,7 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { sendLeadToServer } from '../services/googleSheets';
+import { PARKWAYS_VILLA_GALLERY } from '../data/parkwaysDriveGallery';
 
 // Hero image provided by user
 const PARKWAYS_VILLA_HERO_IMAGE =
@@ -55,70 +56,6 @@ const PARKWAYS_VILLA_VIDEO_URL =
 // Thumbnail extracted directly from the video
 const PARKWAYS_VILLA_VIDEO_THUMBNAIL =
   'https://ik.imagekit.io/pkn80iczwu/Dubai%20Hills%20YL(2).mp4/ik-thumbnail.jpg';
-
-// Villa image gallery sourced directly from user's ImageKit "YL VILLA" library
-const PARKWAYS_VILLA_GALLERY = [
-  {
-    id: 1,
-    title: 'The Parkways Custom Residence - Villa Exterior',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_140831.jpg?updatedAt=1791884436247',
-    caption: 'Custom-built architecture with expansive glazing and landscaped grounds.',
-  },
-  {
-    id: 2,
-    title: 'The Parkways Custom Residence - Grounds & Pool',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_141830.jpg?updatedAt=1791884436199',
-    caption: 'Private outdoor setting designed for comfortable family living and entertaining.',
-  },
-  {
-    id: 3,
-    title: 'The Parkways Custom Residence - Facade Elevation',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_140458.jpg?updatedAt=1791884435827',
-    caption: 'Striking contemporary facade set on an 11,241 sq. ft. plot in Dubai Hills Estate.',
-  },
-  {
-    id: 4,
-    title: 'The Parkways Custom Residence - Outdoor Terraces',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_141143.jpg?updatedAt=1791884435658',
-    caption: 'Multi-level living spaces with private terrace access and community views.',
-  },
-  {
-    id: 5,
-    title: 'The Parkways Custom Residence - Architecture Detail',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_143411%20copy.jpg?updatedAt=1791884435833',
-    caption: 'Custom craftsmanship and premium materials across ~10,000 sq. ft. BUA.',
-  },
-  {
-    id: 6,
-    title: 'The Parkways Custom Residence - Garden Enclave',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_141037.jpg?updatedAt=1791884435011',
-    caption: 'Lush landscaped private garden perimeter providing total seclusion.',
-  },
-  {
-    id: 7,
-    title: 'The Parkways Custom Residence - Terrace Perspective',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_142122.jpg?updatedAt=1791884436655',
-    caption: 'Upper-level vantage points taking in the peaceful green surroundings.',
-  },
-  {
-    id: 8,
-    title: 'The Parkways Custom Residence - Architectural Lighting',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_151627_1.jpg?updatedAt=1791884436413',
-    caption: 'Sophisticated architectural presence illuminated against the evening sky.',
-  },
-  {
-    id: 9,
-    title: 'The Parkways Custom Residence - Private Enclosure',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_140811.jpg?updatedAt=1791884436350',
-    caption: 'Distinguished address in The Parkways, moments from Dubai Hills Golf Club.',
-  },
-  {
-    id: 10,
-    title: 'The Parkways Custom Residence - Residence Vista',
-    url: 'https://ik.imagekit.io/zb5ih81ig/YL%20VILLA%20/20260623_140914.jpg?updatedAt=1791884436282',
-    caption: 'Expansive private residence tailored for luxury Dubai family living.',
-  },
-];
 
 const PHONE_DISPLAY = '+971 58 864 8093';
 const PHONE_INTL = '+971588648093';
@@ -155,6 +92,13 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
   const [isSliderHovered, setIsSliderHovered] = useState<boolean>(false);
   const [activeGalleryIndex, setActiveGalleryIndex] = useState<number | null>(null);
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+
+  // Read the name of the images and sort in number-wise order (e.g. 1, 2, ... 10)
+  const galleryImages = useMemo(() => {
+    return [...PARKWAYS_VILLA_GALLERY].sort((a, b) =>
+      a.originalName.localeCompare(b.originalName, undefined, { numeric: true, sensitivity: 'base' })
+    );
+  }, []);
 
   // Auto-scrolling carousel effect
   useEffect(() => {
@@ -202,14 +146,14 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
   const nextModalImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (activeGalleryIndex === null) return;
-    setActiveGalleryIndex((activeGalleryIndex + 1) % PARKWAYS_VILLA_GALLERY.length);
+    setActiveGalleryIndex((activeGalleryIndex + 1) % galleryImages.length);
   };
 
   const prevModalImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (activeGalleryIndex === null) return;
     setActiveGalleryIndex(
-      (activeGalleryIndex - 1 + PARKWAYS_VILLA_GALLERY.length) % PARKWAYS_VILLA_GALLERY.length
+      (activeGalleryIndex - 1 + galleryImages.length) % galleryImages.length
     );
   };
 
@@ -1284,15 +1228,17 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {/* High-resolution pure villa pictures without text overlays */}
-            {PARKWAYS_VILLA_GALLERY.map((img, index) => (
+            {galleryImages.map((img, index) => (
               <div
                 key={img.id}
                 onClick={() => openModalAt(index)}
                 className="group relative flex-none w-[220px] sm:w-[260px] lg:w-[290px] h-[210px] sm:h-[230px] rounded-xl overflow-hidden bg-white/5 border border-white/10 hover:border-[#CF9F5D]/50 transition-all cursor-pointer snap-start"
               >
                 <img
-                  src={img.url}
+                  src={img.thumbnailUrl || img.url}
                   alt={img.title}
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -1305,7 +1251,7 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
 
                 <div className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-white/90 border border-white/10 font-mono">
-                    {index + 1}/{PARKWAYS_VILLA_GALLERY.length}
+                    {index + 1}/{galleryImages.length}
                   </span>
                 </div>
               </div>
@@ -1908,14 +1854,14 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
               </span>
               <div className="text-sm font-semibold text-white/80">
                 {activeGalleryIndex !== null
-                  ? PARKWAYS_VILLA_GALLERY[activeGalleryIndex]?.title
+                  ? galleryImages[activeGalleryIndex]?.title
                   : 'Residence Gallery'}
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <span className="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-xs text-white/80 font-medium">
-                {activeGalleryIndex !== null ? `${activeGalleryIndex + 1} of ${PARKWAYS_VILLA_GALLERY.length}` : 'Gallery'}
+                {activeGalleryIndex !== null ? `${activeGalleryIndex + 1} of ${galleryImages.length}` : 'Gallery'}
               </span>
 
               <button
@@ -1943,19 +1889,20 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
             </button>
 
             {/* Active Image */}
-            {activeGalleryIndex !== null && PARKWAYS_VILLA_GALLERY[activeGalleryIndex] && (
+            {activeGalleryIndex !== null && galleryImages[activeGalleryIndex] && (
               <div className="relative max-h-[70vh] flex flex-col items-center">
                 <img
-                  src={PARKWAYS_VILLA_GALLERY[activeGalleryIndex].url}
-                  alt={PARKWAYS_VILLA_GALLERY[activeGalleryIndex].title}
+                  src={galleryImages[activeGalleryIndex].url}
+                  alt={galleryImages[activeGalleryIndex].title}
+                  referrerPolicy="no-referrer"
                   className="max-h-[66vh] max-w-full object-contain rounded-xl shadow-2xl border border-white/10"
                 />
                 <div className="mt-3 text-center">
                   <h4 className="text-sm sm:text-base font-bold text-white">
-                    {PARKWAYS_VILLA_GALLERY[activeGalleryIndex].title}
+                    {galleryImages[activeGalleryIndex].title}
                   </h4>
                   <p className="text-xs text-white/60 mt-0.5">
-                    {PARKWAYS_VILLA_GALLERY[activeGalleryIndex].caption}
+                    {galleryImages[activeGalleryIndex].caption}
                   </p>
                 </div>
               </div>
@@ -1974,19 +1921,25 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
           {/* Bottom Thumbnails Row */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-4xl flex items-center justify-center gap-2 overflow-x-auto py-2"
+            className="w-full max-w-4xl flex items-center justify-start sm:justify-center gap-2 overflow-x-auto py-2 px-1"
           >
-            {PARKWAYS_VILLA_GALLERY.map((thumb, idx) => (
+            {galleryImages.map((thumb, idx) => (
               <button
                 key={thumb.id}
                 onClick={() => setActiveGalleryIndex(idx)}
-                className={`relative w-16 h-12 sm:w-20 sm:h-14 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                className={`relative flex-none w-16 h-12 sm:w-20 sm:h-14 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
                   activeGalleryIndex === idx
                     ? 'border-[#CF9F5D] scale-105 shadow-md shadow-[#CF9F5D]/30'
                     : 'border-white/20 opacity-60 hover:opacity-100'
                 }`}
               >
-                <img src={thumb.url} alt={thumb.title} className="w-full h-full object-cover" />
+                <img
+                  src={thumb.thumbnailUrl || thumb.url}
+                  alt={thumb.title}
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
+                  className="w-full h-full object-cover"
+                />
               </button>
             ))}
           </div>
