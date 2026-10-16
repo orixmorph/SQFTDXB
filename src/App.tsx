@@ -15,6 +15,7 @@ import { TermsOfServiceView } from './components/TermsOfServiceView';
 import { PropertyDetailModal } from './components/PropertyDetailModal';
 import { ListPropertyModal } from './components/ListPropertyModal';
 import { SavedPropertiesModal } from './components/SavedPropertiesModal';
+import { ParkwaysVillaLandingPage } from './components/ParkwaysVillaLandingPage';
 import { Footer } from './components/Footer';
 import { Property, SearchFilterState, PropertyPurpose, Area, Agent } from './types';
 import { properties as fallbackProperties, areas as fallbackAreas, agents as fallbackAgents } from './data/mockData';
@@ -30,9 +31,11 @@ import {
 export default function App() {
   const [currentView, setCurrentView] = useState<string>(() => {
     if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '').toLowerCase();
+      if (hash === 'parkways-villa') return 'parkways-villa';
       const params = new URLSearchParams(window.location.search);
       const page = params.get('page')?.toLowerCase();
-      if (page && ['home', 'properties', 'areas', 'blog', 'about', 'contact'].includes(page)) {
+      if (page && ['home', 'properties', 'areas', 'blog', 'about', 'contact', 'parkways-villa'].includes(page)) {
         return page;
       }
     }
@@ -107,22 +110,35 @@ export default function App() {
     };
   }, []);
 
-  // Handle Browser Back Button & History Navigation for Property Detail View
+  // Handle Browser Back Button & History Navigation
   useEffect(() => {
     const handlePopState = () => {
       // If a property detail view is currently open, pressing back brings user back to the previous screen
       setSelectedProperty(null);
+
+      const hash = window.location.hash.replace('#', '').toLowerCase();
+      if (hash === 'parkways-villa') {
+        setCurrentView('parkways-villa');
+      } else if (window.location.hash === '' && currentView === 'parkways-villa') {
+        setCurrentView('home');
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [currentView]);
 
-  // Support direct deep link to property by URL hash or search param
+  // Support direct deep link to property or landing page by URL hash or search param
   useEffect(() => {
     const handleUrlCheck = () => {
       const hash = window.location.hash.replace('#', '').toLowerCase();
       const params = new URLSearchParams(window.location.search);
+      const pageParam = params.get('page')?.toLowerCase();
+
+      if (hash === 'parkways-villa' || pageParam === 'parkways-villa') {
+        setCurrentView('parkways-villa');
+        return;
+      }
 
       const propId = params.get('property') || (hash.startsWith('property-') ? hash.replace('property-', '') : null);
 
@@ -219,6 +235,19 @@ export default function App() {
     if (view === 'blog') {
       setSelectedBlogPost(null);
     }
+    if (view === 'parkways-villa') {
+      try {
+        window.history.pushState({ page: 'parkways-villa' }, '', '#parkways-villa');
+      } catch {
+        // Fallback
+      }
+    } else if (currentView === 'parkways-villa') {
+      try {
+        window.history.pushState(null, '', window.location.pathname + window.location.search);
+      } catch {
+        // Fallback
+      }
+    }
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -273,6 +302,19 @@ export default function App() {
     savedPropertyIds.includes(p.id)
   );
 
+  if (currentView === 'parkways-villa') {
+    return (
+      <>
+        <ParkwaysVillaLandingPage onBackToHome={() => navigateTo('home')} />
+        <ListPropertyModal
+          isOpen={isListPropertyOpen}
+          onClose={() => setIsListPropertyOpen(false)}
+          defaultPurpose={listPropertyPurpose}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white text-[#171717] flex flex-col font-sans selection:bg-[#CF9F5D]/20 selection:text-[#171717]">
       {/* Top Main Navigation */}
@@ -313,6 +355,7 @@ export default function App() {
               properties={propertiesList}
               onSelectProperty={handleSelectProperty}
               onViewAllProperties={() => navigateTo('properties')}
+              onOpenVillaLandingPage={() => navigateTo('parkways-villa')}
             />
 
             {/* SECTION 05 — BLOG & SECONDARY MARKET INSIGHTS */}

@@ -17,12 +17,14 @@ interface NewSecondaryProjectsProps {
   properties?: Property[];
   onSelectProperty: (property: Property) => void;
   onViewAllProperties: () => void;
+  onOpenVillaLandingPage?: () => void;
 }
 
 export const NewSecondaryProjects: React.FC<NewSecondaryProjectsProps> = ({
   properties: passedProperties,
   onSelectProperty,
   onViewAllProperties,
+  onOpenVillaLandingPage,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -57,9 +59,23 @@ export const NewSecondaryProjects: React.FC<NewSecondaryProjectsProps> = ({
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-xs font-semibold text-[#171717] border border-[#EAEAEA] mb-2.5 shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-[#CF9F5D]" />
-              <span>Curated Secondary Exclusives</span>
+            <div className="flex flex-wrap items-center gap-2 mb-2.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-xs font-semibold text-[#171717] border border-[#EAEAEA] shadow-xs">
+                <Sparkles className="w-3.5 h-3.5 text-[#CF9F5D]" />
+                <span>Curated Secondary Exclusives</span>
+              </div>
+              {onOpenVillaLandingPage && (
+                <button
+                  type="button"
+                  id="open-parkways-villa-btn"
+                  onClick={onOpenVillaLandingPage}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-[#F5F5F4] text-xs font-medium text-[#525252] hover:text-[#171717] border border-[#E5E5E5] transition-colors cursor-pointer shadow-2xs"
+                  title="View Custom-Built Villa Showcase"
+                >
+                  <span>The Parkways Showcase</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#CF9F5D]" />
+                </button>
+              )}
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#171717] tracking-tight">
               Hot Listings of the Week
