@@ -179,7 +179,7 @@ export const TermsOfServiceView: React.FC<TermsOfServiceViewProps> = ({
               <div>RERA Broker Registration No. (ORN): <strong>49679</strong></div>
               <div>DLD Commercial License: Registered in Dubai, United Arab Emirates</div>
               <div>Office Location: Boulevard Plaza, Tower 1, Downtown Dubai</div>
-              <div>Telephone: <a href="tel:+971588648093" className="text-[#171717] font-semibold hover:text-[#CF9F5D]">+971 58 864 8093</a></div>
+              <div>Telephone: <a href="tel:+971559419262" className="text-[#171717] font-semibold hover:text-[#CF9F5D]">+971 55 941 9262</a></div>
               <div>Official Website: <a href="https://jamokaproperties.com" target="_blank" rel="noopener noreferrer" className="text-[#CF9F5D] font-semibold underline">jamokaproperties.com</a></div>
             </div>
           </section>

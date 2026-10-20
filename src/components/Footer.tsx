@@ -214,10 +214,20 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <a
-                  href="tel:+971588648093"
+                  href="tel:+971559419262"
                   className="hover:text-white transition-colors"
                 >
-                  +971 58 864 8093
+                  +971 55 941 9262
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://wa.me/971559419262"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#25D366] transition-colors"
+                >
+                  WhatsApp: +971 55 941 9262
                 </a>
               </li>
             </ul>

@@ -253,7 +253,7 @@ export const SellRentCtaBanner: React.FC<SellRentCtaBannerProps> = ({
                   <span>List for Rent</span>
                 </button>
                 <a
-                  href={`https://wa.me/971588648093?text=${encodeURIComponent('Hello SQFT DXB, I would like to list my property for sale/rent.')}`}
+                  href={`https://wa.me/971559419262?text=${encodeURIComponent('Hello SQFT DXB, I would like to list my property for sale/rent.')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-semibold transition-all shadow-xs cursor-pointer"

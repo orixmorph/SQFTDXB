@@ -82,7 +82,7 @@ export const ContactView: React.FC = () => {
                 <Phone className="w-5 h-5 text-[#CF9F5D] flex-shrink-0" />
                 <div>
                   <strong className="block text-[#171717]">Direct Advisory Line</strong>
-                  <a href="tel:+971588648093" className="hover:text-[#CF9F5D] transition-colors">+971 58 864 8093</a>
+                  <a href="tel:+971559419262" className="hover:text-[#CF9F5D] transition-colors">+971 55 941 9262</a>
                 </div>
               </div>
 
@@ -113,7 +113,7 @@ export const ContactView: React.FC = () => {
                 Connect directly with our on-duty senior secondary market specialist for immediate questions on listings or valuations.
               </p>
               <a
-                href="https://wa.me/971588648093?text=Hello%20SQFT%20DXB,%20I%20would%20like%20to%20inquire%20about%20secondary%20properties%20in%20Dubai."
+                href="https://wa.me/971559419262?text=Hello%20SQFT%20DXB,%20I%20would%20like%20to%20inquire%20about%20secondary%20properties%20in%20Dubai."
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs transition-colors"

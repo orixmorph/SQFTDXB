@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   MessageCircle,
+  MessageSquare,
   Phone,
   ArrowLeft,
   Calendar,
@@ -57,9 +58,9 @@ const PARKWAYS_VILLA_VIDEO_URL =
 const PARKWAYS_VILLA_VIDEO_THUMBNAIL =
   'https://ik.imagekit.io/pkn80iczwu/Dubai%20Hills%20YL(2).mp4/ik-thumbnail.jpg';
 
-const PHONE_DISPLAY = '+971 58 864 8093';
-const PHONE_INTL = '+971588648093';
-const WHATSAPP_RAW = '971588648093';
+const PHONE_DISPLAY = '+971 55 941 9262';
+const PHONE_INTL = '+971559419262';
+const WHATSAPP_RAW = '971559419262';
 const SITE_LOGO_URL =
   'https://ik.imagekit.io/zb5ih81ig/SITE%20LOGOS%20(1).png?updatedAt=1791790631428';
 
@@ -1797,10 +1798,22 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
 
             {/* Direct Instant Channels */}
             <div className="mt-8 pt-8 border-t border-white/10 flex flex-wrap items-center justify-center gap-6 text-center text-xs text-white/60">
-              <span className="flex items-center gap-2">
+              <a
+                href={`tel:${PHONE_INTL}`}
+                className="flex items-center gap-2 hover:text-white transition-colors"
+              >
                 <Phone className="w-3.5 h-3.5 text-[#CF9F5D]" />
-                Direct Hotline: <strong className="text-white">{PHONE_DISPLAY}</strong>
-              </span>
+                Direct Hotline: <strong className="text-white underline underline-offset-2">{PHONE_DISPLAY}</strong>
+              </a>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-[#25D366] transition-colors"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-[#25D366]" />
+                WhatsApp: <strong className="text-white underline underline-offset-2">{PHONE_DISPLAY}</strong>
+              </a>
               <span className="flex items-center gap-2">
                 <Building2 className="w-3.5 h-3.5 text-[#CF9F5D]" />
                 Jamoka Properties LLC
@@ -1822,7 +1835,25 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
             <span>&copy; {new Date().getFullYear()} Jamoka Properties LLC. All rights reserved.</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <a
+              href={`tel:${PHONE_INTL}`}
+              className="text-white hover:text-[#CF9F5D] transition-colors font-medium flex items-center gap-1.5"
+            >
+              <Phone className="w-3.5 h-3.5 text-[#CF9F5D]" />
+              <span>{PHONE_DISPLAY}</span>
+            </a>
+            <span>&bull;</span>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#25D366] hover:text-[#1EBE5D] transition-colors font-medium flex items-center gap-1.5"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>WhatsApp</span>
+            </a>
+            <span>&bull;</span>
             <button
               onClick={onBackToHome}
               className="hover:text-white transition-colors cursor-pointer"

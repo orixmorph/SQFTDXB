@@ -325,8 +325,8 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
     (a): a is string => Boolean(a && typeof a === 'string' && a.trim().length > 0)
   );
 
-  const WHATSAPP_NUMBER = '971588648093';
-  const CALL_NUMBER = '+971588648093';
+  const WHATSAPP_NUMBER = '971559419262';
+  const CALL_NUMBER = '+971559419262';
 
   // User-specified WhatsApp pre-filled message:
   // "Hi, I'm interested in Property [PROPERTY_REFERENCE] in [AREA]."
