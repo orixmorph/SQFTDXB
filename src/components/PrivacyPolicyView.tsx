@@ -183,7 +183,7 @@ export const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({ onBackToHo
               <div>Powered by Jamoka Properties (RERA ORN: 49679)</div>
               <div>Boulevard Plaza, Tower 1, Downtown Dubai, UAE</div>
               <div>Telephone: <a href="tel:+971559419262" className="text-[#171717] font-semibold hover:text-[#CF9F5D]">+971 55 941 9262</a></div>
-              <div>Email: <a href="mailto:privacy@sqftdxb.com" className="text-[#CF9F5D] font-semibold underline">privacy@sqftdxb.com</a></div>
+              <div>Email: <a href="mailto:info@jamokaproperties.com" className="text-[#CF9F5D] font-semibold underline">info@jamokaproperties.com</a></div>
             </div>
           </section>
         </div>

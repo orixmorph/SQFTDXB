@@ -366,7 +366,7 @@ export function AdminDashboard({ isOpen, onClose }: AdminDashboardProps) {
                     type="email"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="e.g. admin@sqftdxb.com or your email"
+                    placeholder="e.g. info@jamokaproperties.com or your email"
                     className="w-full p-3 rounded-xl bg-[#FBFBFA] border border-[#EAEAEA] text-xs font-semibold text-[#171717] outline-none focus:border-[#CF9F5D] transition-colors"
                     required
                   />

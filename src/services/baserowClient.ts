@@ -149,7 +149,7 @@ async function fetchDirectAgents(): Promise<Map<string, Agent>> {
           title: extractText(row['Job Title']) || matchedFallback?.title || 'Secondary Market Advisor',
           phone: extractText(row['Phone Number']) || matchedFallback?.phone || '+971 55 941 9262',
           whatsapp: extractText(row['WhatsApp Number']) || matchedFallback?.whatsapp || '971559419262',
-          email: extractText(row['Email']) || matchedFallback?.email || 'sales@sqftdxb.com',
+          email: extractText(row['Email']) || matchedFallback?.email || 'info@jamokaproperties.com',
           photo: photos[0] || matchedFallback?.photo || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80',
           reraNumber: extractText(row['BRN / License']) || '',
           verifiedDeals: 1,

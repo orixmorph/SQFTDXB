@@ -180,6 +180,7 @@ export const TermsOfServiceView: React.FC<TermsOfServiceViewProps> = ({
               <div>DLD Commercial License: Registered in Dubai, United Arab Emirates</div>
               <div>Office Location: Boulevard Plaza, Tower 1, Downtown Dubai</div>
               <div>Telephone: <a href="tel:+971559419262" className="text-[#171717] font-semibold hover:text-[#CF9F5D]">+971 55 941 9262</a></div>
+              <div>Email: <a href="mailto:info@jamokaproperties.com" className="text-[#CF9F5D] font-semibold underline">info@jamokaproperties.com</a></div>
               <div>Official Website: <a href="https://jamokaproperties.com" target="_blank" rel="noopener noreferrer" className="text-[#CF9F5D] font-semibold underline">jamokaproperties.com</a></div>
             </div>
           </section>

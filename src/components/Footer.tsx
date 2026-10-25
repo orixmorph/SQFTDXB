@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Plus, ArrowUpRight } from 'lucide-react';
+import { ShieldCheck, Plus, ArrowUpRight, Mail } from 'lucide-react';
 import { PropertyPurpose } from '../types';
 
 interface FooterProps {
@@ -228,6 +228,15 @@ export const Footer: React.FC<FooterProps> = ({
                   className="hover:text-[#25D366] transition-colors"
                 >
                   WhatsApp: +971 55 941 9262
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:info@jamokaproperties.com"
+                  className="hover:text-white transition-colors inline-flex items-center gap-1.5"
+                >
+                  <Mail className="w-3.5 h-3.5 text-[#CF9F5D]" />
+                  <span>info@jamokaproperties.com</span>
                 </a>
               </li>
             </ul>

@@ -90,7 +90,7 @@ export const ContactView: React.FC = () => {
                 <Mail className="w-5 h-5 text-[#CF9F5D] flex-shrink-0" />
                 <div>
                   <strong className="block text-[#171717]">Client Inquiries</strong>
-                  <span>advisors@sqftdxb.com</span>
+                  <a href="mailto:info@jamokaproperties.com" className="hover:text-[#CF9F5D] transition-colors">info@jamokaproperties.com</a>
                 </div>
               </div>
 

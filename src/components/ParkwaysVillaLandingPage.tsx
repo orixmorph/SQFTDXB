@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   MessageCircle,
   MessageSquare,
+  Mail,
   Phone,
   ArrowLeft,
   Calendar,
@@ -61,6 +62,7 @@ const PARKWAYS_VILLA_VIDEO_THUMBNAIL =
 const PHONE_DISPLAY = '+971 55 941 9262';
 const PHONE_INTL = '+971559419262';
 const WHATSAPP_RAW = '971559419262';
+const CONTACT_EMAIL = 'info@jamokaproperties.com';
 const SITE_LOGO_URL =
   'https://ik.imagekit.io/zb5ih81ig/SITE%20LOGOS%20(1).png?updatedAt=1791790631428';
 
@@ -1814,6 +1816,13 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
                 <MessageSquare className="w-3.5 h-3.5 text-[#25D366]" />
                 WhatsApp: <strong className="text-white underline underline-offset-2">{PHONE_DISPLAY}</strong>
               </a>
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="flex items-center gap-2 hover:text-[#CF9F5D] transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5 text-[#CF9F5D]" />
+                Email: <strong className="text-white underline underline-offset-2">{CONTACT_EMAIL}</strong>
+              </a>
               <span className="flex items-center gap-2">
                 <Building2 className="w-3.5 h-3.5 text-[#CF9F5D]" />
                 Jamoka Properties LLC
@@ -1852,6 +1861,14 @@ export const ParkwaysVillaLandingPage: React.FC<ParkwaysVillaLandingPageProps> =
             >
               <MessageSquare className="w-3.5 h-3.5" />
               <span>WhatsApp</span>
+            </a>
+            <span>&bull;</span>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="text-white hover:text-[#CF9F5D] transition-colors font-medium flex items-center gap-1.5"
+            >
+              <Mail className="w-3.5 h-3.5 text-[#CF9F5D]" />
+              <span>{CONTACT_EMAIL}</span>
             </a>
             <span>&bull;</span>
             <button
